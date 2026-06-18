@@ -24,7 +24,7 @@ function Stat({ label, value, sub, tone = "neutral" }: StatProps) {
   return (
     <div className="rounded-2xl border border-white/10 bg-surface-soft/40 p-4">
       <p className="text-xs text-text-muted">{label}</p>
-      <p className={`mt-1 font-display text-2xl font-semibold tracking-tight ${valueColor}`}>
+      <p className={`mt-1 font-display text-xl font-semibold tracking-tight tabular-nums sm:text-2xl ${valueColor}`}>
         {value}
       </p>
       {sub ? <p className="mt-0.5 text-xs text-text-muted">{sub}</p> : null}

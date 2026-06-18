@@ -24,38 +24,39 @@
 - [x] Règles Cursor spécialisées (`.cursor/rules`)
 - [x] `.gitignore` + dossier `screenshots/`
 - [x] Analyse live du design cible + extraction des vrais tokens (`docs/DESIGN-TOKENS.md`)
-- [ ] Init du dépôt Git
+- [x] Init du dépôt Git (repo GitHub poussé : `simulateur-crypto-sinvestir`)
 
 ### Phase 1 — Scaffolding technique
 - [x] Créer le projet Next.js (App Router) + TypeScript + Tailwind (`app/`, Next 16.2.9, React 19, Tailwind v4)
 - [x] Câbler les **design tokens** de `docs/DESIGN-TOKENS.md` dans `@theme` (Plus Jakarta Sans + Lexend, couleurs, radius) — zéro couleur en dur
 - [x] Dépôt Git unifié à la racine + page d'accueil de validation (rendu fidèle vérifié)
-- [ ] Layout de base (header logo "S²", structure carte, conteneur)
-- [ ] Configurer le déploiement Vercel (preview)
+- [x] Layout de base (header logo "S²", conteneur, hero)
+- [x] Déploiement Vercel (prod en ligne)
 
-### Phase 2 — Cœur fonctionnel (MVP)
-- [ ] Formulaire : crypto, montant, fréquence (one-shot / DCA), dates début+fin
+### Phase 2 — Cœur fonctionnel (MVP) ✅
+- [x] Formulaire : crypto, montant, fréquence (one-shot / DCA), dates début+fin
 - [x] Source de données : dataset local (BTC/ETH/SOL) + abstraction `MarketDataProvider` (CoinGecko branchable) — cf. `strategie/STRATEGIE.md` §2
 - [x] Moteur de calcul backtest : **lump sum** + **DCA** (quotidien/hebdo/mensuel) — fonction pure + 6 tests Vitest ✓
-- [ ] Cartes de résultats : montant investi, valeur finale, +/- value (€ et %)
-- [ ] Graphique d'évolution de la valeur dans le temps
-- [ ] États : loading, erreur, données indisponibles (warnings du moteur déjà prévus)
+- [x] Cartes de résultats : montant investi, valeur finale, +/- value (€ et %)
+- [x] Graphique d'évolution de la valeur dans le temps (Recharts)
+- [x] États : erreur / données indisponibles (warnings du moteur affichés)
 
 ### Phase 3 — Design & responsive
-- [ ] Fidélité pixel au design `simulateurs.sinvestir.fr`
-- [ ] Responsive desktop + mobile
-- [ ] Disclaimer réglementaire (risque crypto)
-- [ ] Accessibilité de base (labels, contrastes, focus)
+- [x] Fidélité au design `simulateurs.sinvestir.fr` (tokens réels, fonts, cartes)
+- [x] **Responsive desktop + mobile** (mobile-first : colonnes empilées, valeurs adaptatives + `tabular-nums`)
+- [x] Disclaimer réglementaire (risque crypto)
+- [~] Accessibilité de base (labels + focus ring OK ; à compléter : navigation clavier, contrastes Lighthouse)
 
 ### Phase 4 — Intégrabilité (bonus)
-- [ ] Composant `<CryptoSimulator />` autonome et réutilisable
-- [ ] Route `/embed` légère (iframe-friendly) + snippet d'intégration
-- [ ] Minimiser les dépendances
+- [x] Composant `<CryptoSimulator />` autonome et réutilisable (props `initialInput`)
+- [x] Route `/embed` légère (iframe-friendly, config par paramètres d'URL) + snippet dans le README
+- [x] Minimiser les dépendances (seul Recharts ajouté)
 
 ### Phase 5 — Livraison
-- [ ] README (lancement, partis pris, justification de stack)
-- [ ] Déploiement production Vercel + vérification du lien
-- [ ] Suggestions d'amélioration (regard de partenaire)
+- [x] README (lancement, partis pris, justification de stack)
+- [x] Déploiement production Vercel + lien fonctionnel
+- [ ] Renommer le projet Vercel + alias propre + connecter le repo (auto-deploy)
+- [ ] Suggestions d'amélioration (regard de partenaire) — rédigées, à mettre dans Tally
 - [ ] (Bonus) Vidéo Loom 5 min
 - [ ] Dépôt via le formulaire Tally
 

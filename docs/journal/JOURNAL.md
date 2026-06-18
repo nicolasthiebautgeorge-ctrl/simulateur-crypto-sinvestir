@@ -117,4 +117,25 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-18] Phase 2 (UI) terminée, déploiement Vercel, embed & responsive
+
+### Contexte
+- Finalisation de l'UI du simulateur, mise en ligne et bonus d'intégrabilité.
+
+### Décisions
+- **UI complète** branchée sur le moteur : `SimulatorForm`, `ResultsCards`, `PerformanceChart` (Recharts), `RiskDisclaimer`, orchestrés par `CryptoSimulator` (client, calculs 100 % client-side). Primitives UI (`Card`, `Button`, `Field`).
+- **Déploiement** : repo GitHub `simulateur-crypto-sinvestir` poussé + déploiement **production Vercel** réussi (build OK, page statique).
+- **Bonus intégrabilité** : route **`/embed`** légère (server component, lit les `searchParams` Next 16), configurable par URL (`crypto`/`frequency`/`amount`/`start`/`end`) + snippet `<iframe>` dans le README.
+- **Responsive** : audit code (mobile-first, colonnes empilées < lg) ; valeurs de cartes en `text-xl sm:text-2xl` + `tabular-nums` pour éviter tout débordement sur petit écran. Vérif via navigateur sur `localhost` abandonnée (l'outil navigateur boucle sur localhost) → contrôle par audit de code + rendu prod.
+- **Graphique** : rendu différé après montage (`useEffect`) pour éviter les warnings de dimensions Recharts au SSR.
+
+### Choix & justifications
+- **`/embed` = réponse directe au bonus du brief** (composant qui peut remplacer le simulateur actuel OU être intégré en aperçu dans un article) sans réaliser l'intégration réelle.
+- **Calculs client-side** : zéro backend, démo stable, composant embarquable.
+
+### Prochaines étapes
+- Renommer/connecter le projet Vercel, puis Loom + dépôt Tally. Bonus possibles : partage par URL, CoinGecko réel, mini-assistant IA.
+
+---
+
 <!-- Nouvelle entrée à ajouter au-dessus de cette ligne -->

@@ -51,3 +51,6 @@ desktop.ini
 # Cache divers
 .cache/
 .turbo/
+
+# Dossier personnel (notes privées, non versionnées)
+perso/

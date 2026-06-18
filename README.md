@@ -90,9 +90,19 @@ Polices : **Plus Jakarta Sans** (titres) + **Lexend** (UI).
 
 ## 🧩 Intégrabilité
 
-`<CryptoSimulator />` accepte des valeurs initiales via `initialInput` et fonctionne sans backend.
-Pistes d'embedding (non implémentées dans le MVP, voir suggestions) : route `/embed` iframe-friendly,
-configuration par props ou paramètres d'URL.
+`<CryptoSimulator />` est autonome, fonctionne sans backend et accepte des valeurs initiales via
+`initialInput`. Une **route `/embed` iframe-friendly** est fournie, **configurable par paramètres
+d'URL** (`crypto`, `frequency`, `amount`, `start`, `end`) :
+
+```html
+<iframe
+  src="https://<votre-demo>.vercel.app/embed?crypto=ethereum&frequency=monthly&amount=50&start=2021-01-01&end=2026-06-01"
+  width="100%" height="900" style="border:0" loading="lazy"
+  title="Simulateur crypto S'investir"></iframe>
+```
+
+Cela montre que le composant peut **prendre la place du simulateur actuel** sur
+`simulateurs.sinvestir.fr` **ou** être **affiché en aperçu intégré** depuis un article `sinvestir.fr`.
 
 ## ⚠️ Limites & avertissement
 
