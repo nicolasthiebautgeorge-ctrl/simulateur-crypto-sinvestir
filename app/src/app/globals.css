@@ -1,26 +1,61 @@
 @import "tailwindcss";
 
+/*
+  Design tokens — source de vérité : docs/DESIGN-TOKENS.md
+  Extraits en direct de simulateurs.sinvestir.fr (2026-06-18).
+  Aucune couleur en dur ailleurs : toujours via ces tokens (bg-surface, text-muted, font-display…).
+*/
+
+@theme {
+  /* Polices (chargées via next/font dans layout.tsx) */
+  --font-sans: var(--font-lexend), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  /* Surfaces (navy sombre) */
+  --color-surface: #080c16;
+  --color-surface-elevated: #00173f;
+  --color-surface-soft: #0f172a;
+  --color-card: #030c24;
+
+  /* Marque & accents */
+  --color-brand: #0049c6;
+  --color-brand-deep: #2945a8;
+  --color-focus: #1098f7;
+  --color-gold: #e4c031;
+  --color-gold-hi: #ffea8f;
+  --color-gold-deep: #d6aa00;
+
+  /* Texte */
+  --color-text: #ffffff;
+  --color-text-subtle: rgba(255, 255, 255, 0.82);
+  --color-text-muted: #9ca3af;
+
+  /* Sémantique (résultats financiers) */
+  --color-success: #00c16a;
+  --color-error: #ef4444;
+  --color-warning: #f5b301;
+  --color-info: #2563eb;
+
+  /* Rayons */
+  --radius-card: 20px;
+
+  /* Conteneur */
+  --container-page: 80rem;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Anneau de focus accessible, cohérent avec la marque */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
