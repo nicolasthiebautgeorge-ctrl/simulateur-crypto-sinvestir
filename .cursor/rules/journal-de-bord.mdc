@@ -1,0 +1,15 @@
+---
+description: Tenue du journal de bord et de la roadmap
+alwaysApply: true
+---
+
+# Journal de bord & Roadmap
+
+À chaque décision importante (technique, design, périmètre) ou nouvelle version :
+
+1. **Ajouter une entrée** en haut de `docs/journal/JOURNAL.md` au format :
+   `## [AAAA-MM-JJ] Titre` → Contexte · Décisions · Choix & justifications · Prochaines étapes.
+2. **Mettre à jour `ROADMAP.md`** : cocher les tâches faites, ajuster les phases si besoin.
+3. **Mettre à jour `docs/CONTEXTE.md`** si la stack, le design ou le périmètre change.
+
+Objectif : pouvoir retracer **pourquoi** chaque choix a été fait. Ne jamais réécrire l'historique du journal — on ajoute, on ne supprime pas.

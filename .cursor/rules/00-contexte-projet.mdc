@@ -1,0 +1,25 @@
+---
+description: Contexte global du projet (test technique S'investir, simulateur crypto)
+alwaysApply: true
+---
+
+# Contexte projet — Simulateur Crypto S'investir
+
+**Mission** : transposer la logique du simulateur crypto de `sinvestir.fr` au design de `simulateurs.sinvestir.fr`, et livrer une démo en ligne (Vercel). Test technique de recrutement.
+
+## Règles de travail
+- **Documentation-first** : tenir à jour `ROADMAP.md` et `docs/journal/JOURNAL.md` à chaque décision/version.
+- **Source de vérité** : lire `docs/CONTEXTE.md` avant toute décision technique ou design.
+- **Périmètre** : MVP propre et fidèle > fonctionnalités ambitieuses bâclées. C'est une demi-journée de charge.
+- **Langue** : code/commentaires en français acceptés, communication en français.
+
+## Priorités d'évaluation (dans l'ordre)
+1. Démo fonctionnelle et manipulable
+2. Fidélité au design S'investir
+3. Qualité & intégrabilité du code
+4. Pertinence des suggestions d'amélioration
+
+## Ne pas oublier
+- Toujours afficher un disclaimer (risque crypto, données historiques).
+- Composant pensé **réutilisable / embarquable**, peu de dépendances.
+- Justifier tout choix de stack dans le README.

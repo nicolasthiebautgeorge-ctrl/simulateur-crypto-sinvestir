@@ -1,0 +1,27 @@
+---
+description: Design system S'investir — fidélité visuelle (couleurs, typo, composants)
+globs: **/*.{tsx,jsx,css,ts}
+alwaysApply: false
+---
+
+# Design system S'investir
+
+Objectif : le simulateur doit être **indiscernable** de la suite `simulateurs.sinvestir.fr`.
+**Source de vérité : `docs/DESIGN-TOKENS.md`** (tokens extraits en direct du CSS réel, 2026-06-18).
+
+## Tokens (réels — extraits du site)
+- **Polices** : `Plus Jakarta Sans` (titres/display) + `Lexend` (corps/UI).
+- **Fonds** : `surface #080C16`, `surface-elevated #00173F`, `card #030C24`/95%.
+- **Primaire / CTA** : bleu marque `#0049C6` ; focus ring `#1098F7`.
+- **Accent doré** : dégradé `#D6AA00 → #E4C031 → #FFEA8F` (aplat `#E4C031`).
+- **Texte** : titres blancs `#FFFFFF` ; sous-titres `white/82%` ; muted `#9CA3AF`.
+- **Sémantique** : gains `#00C16A` (vert), pertes `#EF4444` (rouge).
+- **Cartes** : `border-radius 20px`, bordure `white/10`, ombre `0 32px 80px rgba(0,0,0,.3)` + highlight interne.
+- **Boutons** : pilule (`rounded-full`), poids léger (300), letter-spacing négatif.
+
+## Conventions
+- Centraliser les tokens (variables CSS / config Tailwind) — pas de couleurs en dur dispersées.
+- Layout type : inputs à gauche / cartes de résultats à droite (responsive : empilé sur mobile).
+- Grandes valeurs chiffrées mises en avant en cartes + libellé discret.
+- Toujours vérifier le rendu **mobile** ET **desktop**.
+- Accessibilité : labels explicites, contrastes suffisants, états focus visibles.
