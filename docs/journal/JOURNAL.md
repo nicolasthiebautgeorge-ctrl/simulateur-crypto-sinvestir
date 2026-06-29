@@ -7,6 +7,31 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-29] Coach S'investir IA (avatar + voix) + logo officiel + scénario par défaut
+
+### Contexte
+- Demande : avatar IA conseiller « façon Grok » + intégration du logo officiel + scénario par défaut réaliste.
+- Recherche menée : les personnages Grok (Ani/Rudi) sont **propriétaires, mobile-only, payants, sans API** → non embarquables. Le TTS Groq est **payant et EN/AR seulement** (pas de français).
+
+### Décisions
+- **Logo officiel** S'investir (lockup doré) recadré automatiquement (552×201, fond transparent) et placé plus grand en haut à gauche.
+- **Scénario par défaut** réaliste : 50 €/mois sur Bitcoin depuis juil. 2024 (au lieu de 100 €/mois depuis 2020 → somme démesurée).
+- **Coach IA** = combo gratuit/fiable : abstraction `AdvisorProvider` (comme `MarketDataProvider`).
+  - `MockAdvisor` déterministe (intents : risque, panique, DCA, comparaison, conseil→recadrage AMF, fallback) → **démo incassable, hors-ligne**.
+  - Route `/api/advisor` : **Groq LLM** si `GROQ_API_KEY`, sinon fallback mock. Clé côté serveur (jamais exposée).
+  - **Voix** fr-FR via **Web Speech API** (gratuit, navigateur), bouton on/off.
+  - **Avatar** = orbe dorée animée (Framer Motion) avec états idle/thinking/speaking.
+  - **Cadre AMF** : coach pédagogique, jamais de conseil personnalisé (system prompt + disclaimer).
+
+### Choix & justifications
+- Pas de Grok/avatar 3D (impossible/payant/fragile) → orbe on-brand + Web Speech = effet « waouh » crédible et fiable.
+- Abstraction + fallback = signal Dev IA fort (archi propre) + démo qui ne casse jamais sans clé.
+
+### Prochaines étapes
+- (Option) brancher une clé Groq gratuite sur Vercel pour activer le vrai LLM. Loom + dépôt Tally.
+
+---
+
 ## [2026-06-29] Direction artistique 2026 : nouveau logo + motion & effets
 
 ### Contexte

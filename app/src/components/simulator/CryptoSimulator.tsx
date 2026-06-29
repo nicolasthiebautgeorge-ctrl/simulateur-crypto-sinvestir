@@ -14,6 +14,8 @@ import { BehaviorInsight } from "@/components/simulator/BehaviorInsight";
 import { BenchmarkComparison } from "@/components/simulator/BenchmarkComparison";
 import { PerformanceChart } from "@/components/simulator/PerformanceChart";
 import { RiskDisclaimer } from "@/components/simulator/RiskDisclaimer";
+import { CoachPanel } from "@/components/advisor/CoachPanel";
+import { buildAdvisorContext } from "@/lib/advisor/buildContext";
 
 const DEFAULT_INPUT: SimulationInput = {
   crypto: "bitcoin",
@@ -54,6 +56,11 @@ export function CryptoSimulator({ initialInput }: CryptoSimulatorProps) {
   const benchmarks = useMemo(
     () => calculateBenchmarks(result, input.amount),
     [result, input.amount],
+  );
+
+  const advisorContext = useMemo(
+    () => buildAdvisorContext(result, benchmarks),
+    [result, benchmarks],
   );
 
   const hasResult = result.totalInvested > 0;
@@ -114,6 +121,9 @@ export function CryptoSimulator({ initialInput }: CryptoSimulatorProps) {
             </Reveal>
             <Reveal delay={0.18}>
               <BenchmarkComparison result={result} benchmarks={benchmarks} />
+            </Reveal>
+            <Reveal delay={0.24}>
+              <CoachPanel context={advisorContext} />
             </Reveal>
           </>
         ) : (
