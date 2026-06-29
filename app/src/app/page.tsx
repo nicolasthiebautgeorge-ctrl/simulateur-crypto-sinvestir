@@ -2,30 +2,44 @@ import { CryptoSimulator } from "@/components/simulator/CryptoSimulator";
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-[var(--container-page)] px-5 py-10 sm:px-8 sm:py-14">
-      <header className="flex items-center gap-2">
-        <span className="font-display text-2xl font-bold text-gold">S&sup2;</span>
-        <span className="text-sm font-light uppercase tracking-[0.2em] text-text-subtle">
-          Simulateurs
-        </span>
+    <main className="mx-auto w-full max-w-[var(--container-page)] px-5 py-8 sm:px-8 sm:py-10">
+      <header className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="font-display text-2xl font-bold text-gold">
+            S&sup2;
+          </span>
+          <span className="text-sm font-light uppercase tracking-[0.2em] text-text-subtle">
+            Simulateurs
+          </span>
+        </div>
+        <a
+          href="https://sinvestir.fr"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm font-light text-text-muted transition-colors hover:text-text"
+        >
+          Découvrir S&apos;investir
+        </a>
       </header>
 
-      <section className="mt-10 max-w-2xl">
-        <span className="inline-flex items-center rounded-full border border-white/10 px-4 py-1.5 text-sm font-light tracking-tight text-text-subtle">
-          Simulateur crypto
-        </span>
-        <h1 className="mt-5 font-display text-3xl font-medium leading-tight tracking-tight sm:text-5xl">
-          Combien aurait rapporté votre{" "}
-          <span className="text-gold">investissement crypto</span> ?
-        </h1>
-        <p className="mt-4 max-w-xl text-base text-text-subtle">
-          Testez un achat unique ou un investissement programmé (DCA) sur des
-          données historiques, et visualisez l&apos;évolution de votre
-          portefeuille.
+      <section className="mt-12 text-center">
+        <div className="flex items-center justify-center gap-3">
+          <span className="hidden h-px w-10 bg-gradient-to-r from-transparent to-brand sm:block" />
+          <h1 className="font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">
+            Simulateur Crypto
+          </h1>
+          <span className="hidden h-px w-10 bg-gradient-to-l from-transparent to-brand sm:block" />
+        </div>
+        <p className="mt-3 text-base font-medium text-brand-light">
+          Et si vous aviez investi ? Mesurez le potentiel du DCA et de l&apos;achat unique.
+        </p>
+        <p className="mx-auto mt-2 max-w-xl text-sm text-text-muted">
+          Backtest sur données historiques (Bitcoin, Ethereum, Solana). Choisissez votre
+          stratégie et visualisez l&apos;évolution de votre portefeuille.
         </p>
       </section>
 
-      <section className="mt-10">
+      <section className="mt-8">
         <CryptoSimulator />
       </section>
     </main>
