@@ -33,7 +33,7 @@ export interface AdvisorContext {
 export interface AdvisorReply {
   reply: string;
   /** Origine de la réponse (utile pour la démo / le debug). */
-  source: "groq" | "mock";
+  source: "openai" | "groq" | "mock";
 }
 
 /** Contrat commun mock / LLM. */

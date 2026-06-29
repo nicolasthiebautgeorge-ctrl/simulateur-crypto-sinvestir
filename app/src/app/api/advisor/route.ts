@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import type { AdvisorContext, AdvisorMessage } from "@/lib/advisor/types";
 import { answerWithMock } from "@/lib/advisor/mockAdvisor";
+import { checkRateLimit, clientKey } from "@/lib/advisor/rateLimit";
 
 interface AdvisorRequestBody {
   messages: AdvisorMessage[];
   context: AdvisorContext;
 }
 
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MAX_TOKENS = 320;
 
 function systemPrompt(ctx: AdvisorContext): string {
   return [
@@ -24,6 +25,72 @@ function systemPrompt(ctx: AdvisorContext): string {
   ].join("\n");
 }
 
+function chatMessages(messages: AdvisorMessage[], ctx: AdvisorContext) {
+  const recent = messages.slice(-8);
+  return [
+    { role: "system" as const, content: systemPrompt(ctx) },
+    ...recent.map((m) => ({ role: m.role, content: m.content })),
+  ];
+}
+
+/** OpenAI (prioritaire) — meilleur français. Renvoie null si pas de clé. */
+async function callOpenAI(
+  messages: AdvisorMessage[],
+  ctx: AdvisorContext,
+): Promise<string | null> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return null;
+
+  const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.5,
+      max_tokens: MAX_TOKENS,
+      messages: chatMessages(messages, ctx),
+    }),
+  });
+  if (!res.ok) throw new Error(`OpenAI HTTP ${res.status}`);
+  const data = await res.json();
+  const reply: string | undefined = data?.choices?.[0]?.message?.content;
+  if (!reply) throw new Error("Empty OpenAI reply");
+  return reply.trim();
+}
+
+/** Groq (secondaire) — tier gratuit. Renvoie null si pas de clé. */
+async function callGroq(
+  messages: AdvisorMessage[],
+  ctx: AdvisorContext,
+): Promise<string | null> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) return null;
+
+  const model = process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile";
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.5,
+      max_tokens: MAX_TOKENS,
+      messages: chatMessages(messages, ctx),
+    }),
+  });
+  if (!res.ok) throw new Error(`Groq HTTP ${res.status}`);
+  const data = await res.json();
+  const reply: string | undefined = data?.choices?.[0]?.message?.content;
+  if (!reply) throw new Error("Empty Groq reply");
+  return reply.trim();
+}
+
 export async function POST(request: Request) {
   let body: AdvisorRequestBody;
   try {
@@ -38,41 +105,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing context" }, { status: 400 });
   }
 
-  const apiKey = process.env.GROQ_API_KEY;
-
-  // Pas de clé → fallback mock (la démo marche toujours).
-  if (!apiKey) {
+  // Garde-fou : au-delà de la limite, on sert le mock (protège la clé payante).
+  const rl = checkRateLimit(`advisor:${clientKey(request)}`, 20, 60_000);
+  if (!rl.ok) {
     return NextResponse.json(answerWithMock(messages, context));
   }
 
+  const usingOpenAI = Boolean(process.env.OPENAI_API_KEY);
   try {
-    const model = process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile";
-    const recent = messages.slice(-8);
-    const res = await fetch(GROQ_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.5,
-        max_tokens: 320,
-        messages: [
-          { role: "system", content: systemPrompt(context) },
-          ...recent.map((m) => ({ role: m.role, content: m.content })),
-        ],
-      }),
-    });
-
-    if (!res.ok) throw new Error(`Groq HTTP ${res.status}`);
-    const data = await res.json();
-    const reply: string | undefined = data?.choices?.[0]?.message?.content;
-    if (!reply) throw new Error("Empty Groq reply");
-
-    return NextResponse.json({ reply: reply.trim(), source: "groq" });
+    const reply =
+      (await callOpenAI(messages, context)) ??
+      (await callGroq(messages, context));
+    if (reply) {
+      return NextResponse.json({
+        reply,
+        source: usingOpenAI ? "openai" : "groq",
+      });
+    }
   } catch {
-    // Toute erreur LLM (quota, réseau…) → fallback mock silencieux.
-    return NextResponse.json(answerWithMock(messages, context));
+    // Erreur LLM (quota, réseau, modèle invalide…) → fallback mock silencieux.
   }
+
+  return NextResponse.json(answerWithMock(messages, context));
 }

@@ -17,9 +17,9 @@ const SUGGESTIONS = [
   "C'est mieux qu'un ETF ?",
 ];
 
-/** Synthèse vocale fr-FR (Web Speech API, gratuite et locale au navigateur). */
-function speak(text: string) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+/** Repli gratuit : synthèse vocale fr-FR du navigateur (Web Speech API). */
+function speakWebSpeech(text: string) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text.replace(/[\p{Emoji}]/gu, ""));
   u.lang = "fr-FR";
@@ -28,6 +28,7 @@ function speak(text: string) {
     .find((v) => v.lang?.toLowerCase().startsWith("fr"));
   if (frVoice) u.voice = frVoice;
   window.speechSynthesis.speak(u);
+  return true;
 }
 
 export function CoachPanel({ context }: CoachPanelProps) {
@@ -39,6 +40,7 @@ export function CoachPanel({ context }: CoachPanelProps) {
   const [speaking, setSpeaking] = useState(false);
   const [voiceOn, setVoiceOn] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -47,28 +49,70 @@ export function CoachPanel({ context }: CoachPanelProps) {
     });
   }, [messages, loading]);
 
-  // Coupe la voix au démontage.
+  // Coupe la voix (audio + Web Speech) au démontage.
   useEffect(() => {
-    return () => {
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-    };
+    return () => stopVoice();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function say(text: string) {
-    if (!voiceOn) return;
-    setSpeaking(true);
-    speak(text);
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      const u = window.speechSynthesis;
-      const poll = setInterval(() => {
-        if (!u.speaking) {
-          clearInterval(poll);
-          setSpeaking(false);
-        }
-      }, 250);
+  function stopVoice() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
     }
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    setSpeaking(false);
+  }
+
+  /** Repli Web Speech avec suivi de l'état "parle". */
+  function fallbackVoice(text: string) {
+    const ok = speakWebSpeech(text);
+    if (!ok || typeof window === "undefined") {
+      setSpeaking(false);
+      return;
+    }
+    const synth = window.speechSynthesis;
+    const poll = setInterval(() => {
+      if (!synth.speaking) {
+        clearInterval(poll);
+        setSpeaking(false);
+      }
+    }, 250);
+  }
+
+  /** Voix neuronale OpenAI (via /api/tts) ; repli Web Speech si indispo. */
+  async function say(text: string) {
+    if (!voiceOn) return;
+    stopVoice();
+    setSpeaking(true);
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const type = res.headers.get("content-type") ?? "";
+      if (res.ok && type.includes("audio")) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        const cleanup = () => {
+          URL.revokeObjectURL(url);
+          if (audioRef.current === audio) audioRef.current = null;
+          setSpeaking(false);
+        };
+        audio.onended = cleanup;
+        audio.onerror = cleanup;
+        await audio.play();
+        return;
+      }
+    } catch {
+      // ignore → repli
+    }
+    fallbackVoice(text);
   }
 
   async function send(question: string) {
@@ -122,10 +166,7 @@ export function CoachPanel({ context }: CoachPanelProps) {
         <button
           type="button"
           onClick={() => {
-            if (voiceOn && typeof window !== "undefined") {
-              window.speechSynthesis?.cancel();
-              setSpeaking(false);
-            }
+            if (voiceOn) stopVoice();
             setVoiceOn((v) => !v);
           }}
           aria-pressed={voiceOn}

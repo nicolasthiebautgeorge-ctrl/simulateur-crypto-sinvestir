@@ -7,6 +7,26 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-30] Coach IA : conseil OpenAI (GPT) + voix neuronale OpenAI TTS + garde-fous
+
+### Contexte
+- Choix d'upgrader le coach : meilleur modèle de conseil + voix réaliste. Rappel : abo ChatGPT Pro ≠ accès API (facturation API séparée).
+
+### Décisions
+- **Conseil** : route `/api/advisor` généralisée → priorité **OpenAI (GPT)** > Groq > mock (auto-détection selon la clé présente).
+- **Voix** : nouvelle route `/api/tts` → **OpenAI TTS** (mp3), avec **repli Web Speech** (204 si pas de clé/erreur/quota). `CoachPanel` lit l'audio neuronal, sinon voix navigateur.
+- **Garde-fous** (endpoint public + clé payante) : rate-limit in-memory par IP (advisor 20/min, tts 30/min), `max_tokens` court (320), input TTS tronqué (600 car.), **fallback mock systématique** → jamais d'erreur visible, coût maîtrisé.
+- Variables d'env documentées (`.env.example`) : `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_TTS_MODEL`, `OPENAI_TTS_VOICE`.
+
+### Choix & justifications
+- OpenAI = conseil + voix avec **une seule clé**, meilleur français. Abstraction conservée → on change de provider sans toucher l'UI.
+- Rate-limit in-memory = pragmatique pour une démo (note : store durable type Vercel KV/Upstash en prod).
+
+### Prochaines étapes
+- Ajouter `OPENAI_API_KEY` (+ un peu de crédit) dans Vercel pour activer GPT + voix neuronale. Loom + dépôt Tally.
+
+---
+
 ## [2026-06-29] Coach S'investir IA (avatar + voix) + logo officiel + scénario par défaut
 
 ### Contexte
