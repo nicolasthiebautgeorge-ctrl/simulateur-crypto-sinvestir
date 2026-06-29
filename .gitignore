@@ -45,8 +45,11 @@ desktop.ini
 *.swp
 *.swo
 
-# Cursor (on garde les rules versionnées, on ignore le reste si besoin)
-# .cursor/
+# Cursor — règles d'agents IA (non montrées pour le test de recrutement)
+.cursor/
+
+# Stratégie interne (non montrée pour le test de recrutement)
+strategie/
 
 # Cache divers
 .cache/
