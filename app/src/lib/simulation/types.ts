@@ -64,6 +64,19 @@ export interface PanicScenario {
   costOfPanic: number;
 }
 
+/**
+ * Résultat d'un placement de comparaison (ETF Monde, Livret A) sur le MÊME scénario
+ * (même montants, même calendrier, même période) que la crypto simulée.
+ */
+export interface BenchmarkResult {
+  id: string;
+  label: string;
+  totalInvested: number;
+  finalValue: number;
+  profit: number;
+  profitPct: number;
+}
+
 /** Indicateurs de risque/volatilité sur la période (honnêteté pédagogique). */
 export interface RiskMetrics {
   /** Plus forte baisse pic→creux du cours sur la période (valeur négative, en %). */

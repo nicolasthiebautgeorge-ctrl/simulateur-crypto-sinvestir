@@ -7,6 +7,27 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-29] Mise en perspective : crypto vs ETF Monde vs Livret A
+
+### Contexte
+- Suite de la vision (feature #2). Les clones ne montrent que la crypto qui « moone » ; on remet le risque/rendement en **contexte** (ADN prudent S'investir).
+
+### Décisions
+- **Datasets benchmark locaux** (`benchmarkDataset.ts`) : ETF Monde (type MSCI World, EUR, base 100) + Livret A modélisé par ses **taux réglementaires successifs** (capitalisation par morceaux).
+- **Fonction pure `calculateBenchmarks`** : rejoue le **même calendrier** de versements (mêmes dates, même montant, même période) sur ETF Monde et Livret A.
+- **UI `BenchmarkComparison`** : section « Mise en perspective » (barres comparées crypto/ETF/Livret A, crypto en or).
+- **Tests** : +5 (capitalisation Livret A, cohérence investi, ETF > Livret A, montant invalide). 14/14 verts.
+
+### Choix & justifications
+- Honnêteté assumée : la crypto peut surperformer **au prix d'une volatilité bien supérieure** (lien avec le max drawdown). Repères étiquetés « approximatifs / pédagogiques ».
+- Tout passe par la même abstraction (séries de prix + facteur de capitalisation) → cohérent avec `MarketDataProvider`.
+
+### Prochaines étapes
+- Assistant langage naturel (NL → formulaire + leçon) = signal Dev IA.
+- Pass design 2026 (motion/storytelling) avec les mockups.
+
+---
+
 ## [2026-06-29] Différenciation : « Discipline vs Émotion » (EBI) + métriques de risque
 
 ### Contexte
