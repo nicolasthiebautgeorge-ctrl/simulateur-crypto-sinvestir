@@ -147,3 +147,63 @@ describe("calculateSimulation — robustesse", () => {
     );
   });
 });
+
+// Marché qui monte (100→200), s'effondre (→50) puis rebondit fort (→300).
+const crash = makeProvider([
+  { date: "2020-01-01", price: 100 },
+  { date: "2020-06-01", price: 200 },
+  { date: "2020-09-01", price: 50 },
+  { date: "2020-12-01", price: 300 },
+]);
+
+describe("calculateSimulation — risque & comportement", () => {
+  it("calcule un max drawdown négatif proche du pire krach", () => {
+    const r = calculateSimulation(
+      {
+        crypto: "bitcoin",
+        amount: 1000,
+        frequency: "one-shot",
+        startDate: "2020-01-01",
+        endDate: "2020-12-01",
+      },
+      crash,
+    );
+    // Pic ~200 → creux ~50 ⇒ drawdown ~ -75 %.
+    expect(r.risk.maxDrawdownPct).toBeLessThan(-60);
+    expect(r.risk.timeUnderwaterPct).toBeGreaterThanOrEqual(0);
+  });
+
+  it("chiffre le coût de la panique (vendre au creux puis rester en cash)", () => {
+    const r = calculateSimulation(
+      {
+        crypto: "bitcoin",
+        amount: 1000,
+        frequency: "one-shot",
+        startDate: "2020-01-01",
+        endDate: "2020-12-01",
+      },
+      crash,
+    );
+    // Discipliné : 10 unités × 300 = 3000. Paniqué : vend ~10 × 50 ≈ 500.
+    expect(r.finalValue).toBeCloseTo(3000, 0);
+    expect(r.panic.finalValue).toBeLessThan(r.finalValue);
+    expect(r.panic.costOfPanic).toBeGreaterThan(1500);
+    // La trajectoire panique finit bien sur la valeur cash du scénario.
+    const last = r.timeline[r.timeline.length - 1];
+    expect(last.panicValue).toBeCloseTo(r.panic.finalValue, 6);
+  });
+
+  it("expose panicValue sur chaque point de la timeline", () => {
+    const r = calculateSimulation(
+      {
+        crypto: "bitcoin",
+        amount: 100,
+        frequency: "monthly",
+        startDate: "2020-01-01",
+        endDate: "2020-12-01",
+      },
+      crash,
+    );
+    expect(r.timeline.every((p) => typeof p.panicValue === "number")).toBe(true);
+  });
+});

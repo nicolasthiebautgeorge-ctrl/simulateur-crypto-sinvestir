@@ -101,6 +101,15 @@ export function PerformanceChart({ data, currency }: PerformanceChartProps) {
             strokeDasharray="5 4"
             dot={false}
           />
+          <Line
+            type="monotone"
+            dataKey="panicValue"
+            name="Si vous aviez paniqué"
+            stroke="#f87171"
+            strokeWidth={1.75}
+            strokeDasharray="2 3"
+            dot={false}
+          />
         </ComposedChart>
       </ResponsiveContainer>
     </div>

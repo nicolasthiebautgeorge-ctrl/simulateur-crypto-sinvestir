@@ -7,6 +7,7 @@ import { localProvider } from "@/lib/market-data/marketDataProvider";
 import { Card } from "@/components/ui/Card";
 import { SimulatorForm } from "@/components/simulator/SimulatorForm";
 import { ResultsCards } from "@/components/simulator/ResultsCards";
+import { BehaviorInsight } from "@/components/simulator/BehaviorInsight";
 import { PerformanceChart } from "@/components/simulator/PerformanceChart";
 import { RiskDisclaimer } from "@/components/simulator/RiskDisclaimer";
 
@@ -92,6 +93,7 @@ export function CryptoSimulator({ initialInput }: CryptoSimulatorProps) {
                 currency={result.currency}
               />
             </Card>
+            <BehaviorInsight result={result} />
           </>
         ) : (
           <Card className="flex min-h-[200px] items-center justify-center p-6">

@@ -7,6 +7,47 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-29] Différenciation : « Discipline vs Émotion » (EBI) + métriques de risque
+
+### Contexte
+- Constat : un autre candidat (damien K) a livré un **clone fidèle** (CoinGecko + one-shot/DCA). La fidélité ne suffit plus → besoin de se démarquer sur la **vision produit** et l'alignement avec l'ADN S'investir (Evidence-Based Investing) et le poste **Dev IA**.
+- Vision figée dans `perso/vision-produit-2026.md` (thèse : calculateur → copilote de décision pédagogique).
+
+### Décisions
+- **Moteur étendu (fonction pure)** : ajout de
+  - `risk` : max drawdown du cours (pic→creux), dates pic/creux, % de temps en moins-value ;
+  - `panic` : scénario « vente au pire creux puis cash » → coût chiffré de la panique ;
+  - `timeline[].panicValue` : trajectoire de l'investisseur paniqué (superposable au graphique).
+- **Nouveau composant `BehaviorInsight`** : section « Discipline vs émotion » (discipliné vs paniqué, coût, multiple, stress-test). Courbe panique ajoutée au graphique (rouge pointillé).
+- **Tests** : +3 cas (drawdown, coût de panique, présence de `panicValue`). 9/9 verts.
+
+### Choix & justifications
+- On retourne l'outil du « combien j'aurais gagné » vers « la discipline bat l'émotion » : c'est **on-brand EBI**, **honnête** (on montre la pire chute), et **impossible à cloner sans comprendre leur business**.
+- **Garde-fous conformité** : 100 % rétrospectif/pédagogique, aucune projection ni conseil personnalisé.
+
+### Prochaines étapes
+- Benchmark crypto vs ETF Monde / Livret A (mise en contexte du risque).
+- Assistant langage naturel (NL → formulaire + leçon) = signal Dev IA.
+- Pass design 2026 (motion/storytelling) avec les mockups.
+
+---
+
+## [2026-06-29] Auto-deploy GitHub OK + vrai logo S'investir
+
+### Contexte
+- Repo GitHub connecté au projet Vercel `app` avec **Root Directory = `app`** (1er build avait échoué car root pointait sur la racine, sans `package.json`).
+
+### Décisions / constats
+- **Auto-deploy validé** : un push sur `master` (commit `c347370`) a déclenché automatiquement un déploiement prod sur le projet `app` (URL inchangée `https://app-ashy-one-53.vercel.app`). Le lien GitHub↔Vercel est propre.
+- **Logo** : remplacement du placeholder "S²" par le **vrai logo S'investir** (`app/public/logo-sinvestir.png`, affiché via `next/image`, 40px) à côté de "SIMULATEURS".
+- **Note** : le domaine `simulateur-crypto-sinvestir.vercel.app` appartient à un **autre compte** (tableau de bord S'investir réel "damien K") — d'où l'échec d'alias précédent. On garde donc `app-ashy-one-53.vercel.app` comme URL de démo.
+
+### Prochaines étapes
+- Captures d'écran de l'app (home, résultats, graphique, mobile, embed).
+- (Optionnel) Désactiver Vercel Authentication si on veut une URL custom publique.
+
+---
+
 ## [2026-06-18] Vérif prod + URL propre + diagnostic Deployment Protection
 
 ### Contexte

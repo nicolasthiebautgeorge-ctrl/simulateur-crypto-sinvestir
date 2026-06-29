@@ -41,8 +41,39 @@ export interface TimelinePoint {
   date: string;
   /** Cumul investi à cette date. */
   invested: number;
-  /** Valeur du portefeuille à cette date. */
+  /** Valeur du portefeuille (investisseur discipliné qui conserve). */
   value: number;
+  /**
+   * Patrimoine de l'investisseur « paniqué » qui a tout vendu au pire creux puis
+   * gardé ses versements en cash. Sert à superposer les deux trajectoires.
+   */
+  panicValue: number;
+}
+
+/**
+ * Scénario comportemental : on quantifie le coût d'avoir paniqué.
+ * L'investisseur vend la totalité de ses positions au plus bas du plus gros krach,
+ * puis conserve ses versements suivants en cash (il ne rachète jamais).
+ */
+export interface PanicScenario {
+  /** Date de la vente panique (creux du plus fort drawdown). */
+  sellDate: string;
+  /** Patrimoine final de l'investisseur paniqué (cash). */
+  finalValue: number;
+  /** Manque à gagner vs l'investisseur discipliné (peut être négatif). */
+  costOfPanic: number;
+}
+
+/** Indicateurs de risque/volatilité sur la période (honnêteté pédagogique). */
+export interface RiskMetrics {
+  /** Plus forte baisse pic→creux du cours sur la période (valeur négative, en %). */
+  maxDrawdownPct: number;
+  /** Date du pic précédant le plus gros drawdown. */
+  maxDrawdownPeakDate: string;
+  /** Date du creux du plus gros drawdown. */
+  maxDrawdownTroughDate: string;
+  /** Part du temps où le portefeuille valait moins que l'investi (en %). */
+  timeUnderwaterPct: number;
 }
 
 /** Avertissement non bloquant (ex. dates ajustées à la plage disponible). */
@@ -75,7 +106,11 @@ export interface SimulationResult {
   profit: number;
   /** Plus/moins-value en pourcentage. */
   profitPct: number;
-  /** Série pour le graphique (investi vs valeur). */
+  /** Série pour le graphique (investi vs valeur vs panique). */
   timeline: TimelinePoint[];
+  /** Indicateurs de risque (max drawdown, temps en moins-value). */
+  risk: RiskMetrics;
+  /** Scénario « panique » (coût de la vente au pire moment). */
+  panic: PanicScenario;
   warnings: SimulationWarning[];
 }

@@ -35,6 +35,13 @@ export function calculateSimulation(
     profit: 0,
     profitPct: 0,
     timeline: [],
+    risk: {
+      maxDrawdownPct: 0,
+      maxDrawdownPeakDate: input.startDate,
+      maxDrawdownTroughDate: input.startDate,
+      timeUnderwaterPct: 0,
+    },
+    panic: { sellDate: input.startDate, finalValue: 0, costOfPanic: 0 },
     warnings: extraWarning ? [...warnings, extraWarning] : warnings,
   });
 
@@ -93,7 +100,15 @@ export function calculateSimulation(
   const profit = finalValue - totalInvested;
   const profitPct = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
 
-  const timeline = buildTimeline(input, provider, start, end, purchases);
+  const { timeline, risk, panic } = buildTimelineAndMetrics(
+    input,
+    provider,
+    start,
+    end,
+    purchases,
+    totalInvested,
+    finalValue,
+  );
 
   return {
     crypto: input.crypto,
@@ -107,6 +122,8 @@ export function calculateSimulation(
     profit,
     profitPct,
     timeline,
+    risk,
+    panic,
     warnings,
   };
 }
@@ -118,33 +135,99 @@ function clamp(value: string, min: string, max: string): string {
   return value;
 }
 
-/** Série échantillonnée investi vs valeur, pour le graphique. */
-function buildTimeline(
+type Purchase = { date: string; cumQuantity: number; cumInvested: number };
+
+/** État cumulé (quantité + investi) à une date donnée. */
+function cumStateAt(purchases: Purchase[], t: number): { quantity: number; invested: number } {
+  let quantity = 0;
+  let invested = 0;
+  for (const p of purchases) {
+    if (parseISO(p.date).getTime() <= t) {
+      quantity = p.cumQuantity;
+      invested = p.cumInvested;
+    } else {
+      break;
+    }
+  }
+  return { quantity, invested };
+}
+
+/**
+ * Construit la série du graphique ET les indicateurs comportementaux en une passe :
+ * - `value` : patrimoine de l'investisseur discipliné (conserve tout).
+ * - `panicValue` : patrimoine de celui qui a vendu au pire creux puis gardé ses versements en cash.
+ * - `risk` : max drawdown du cours + part du temps en moins-value.
+ * - `panic` : coût chiffré de la vente au pire moment.
+ */
+function buildTimelineAndMetrics(
   input: SimulationInput,
   provider: MarketDataProvider,
   start: string,
   end: string,
-  purchases: { date: string; cumQuantity: number; cumInvested: number }[],
-): TimelinePoint[] {
+  purchases: Purchase[],
+  totalInvested: number,
+  finalValue: number,
+) {
   const samples = sampleDates(start, end);
-  return samples.map((date) => {
-    const t = parseISO(date).getTime();
-    // État cumulé (quantité + investi) à cette date.
-    let cumQuantity = 0;
-    let cumInvested = 0;
-    for (const p of purchases) {
-      if (parseISO(p.date).getTime() <= t) {
-        cumQuantity = p.cumQuantity;
-        cumInvested = p.cumInvested;
-      } else {
-        break;
-      }
+  const prices = samples.map((date) => provider.getPriceAt(input.crypto, date) ?? 0);
+
+  // 1. Max drawdown du cours (pic → creux), pour situer la « panique » et le stress-test.
+  let peak = prices[0] ?? 0;
+  let peakDate = samples[0] ?? start;
+  let runningPeakDate = peakDate;
+  let maxDrawdownPct = 0;
+  let troughDate = samples[0] ?? start;
+  let troughPrice = prices[0] ?? 0;
+  for (let i = 0; i < samples.length; i++) {
+    const price = prices[i];
+    if (price > peak) {
+      peak = price;
+      runningPeakDate = samples[i];
     }
-    const price = provider.getPriceAt(input.crypto, date) ?? 0;
-    return {
-      date,
-      invested: cumInvested,
-      value: cumQuantity * price,
-    };
+    const dd = peak > 0 ? price / peak - 1 : 0;
+    if (dd < maxDrawdownPct) {
+      maxDrawdownPct = dd;
+      troughDate = samples[i];
+      troughPrice = price;
+      peakDate = runningPeakDate;
+    }
+  }
+
+  // 2. Trajectoire « panique » : vente totale au creux, versements suivants gardés en cash.
+  const troughT = parseISO(troughDate).getTime();
+  const atTrough = cumStateAt(purchases, troughT);
+  const cashFromSale = atTrough.quantity * troughPrice;
+
+  // 3. Série + temps en moins-value.
+  let underwaterCount = 0;
+  let investedPoints = 0;
+  const timeline: TimelinePoint[] = samples.map((date, i) => {
+    const t = parseISO(date).getTime();
+    const { quantity, invested } = cumStateAt(purchases, t);
+    const value = quantity * prices[i];
+    const panicValue =
+      t <= troughT ? value : cashFromSale + (invested - atTrough.invested);
+    if (invested > 0) {
+      investedPoints++;
+      if (value < invested) underwaterCount++;
+    }
+    return { date, invested, value, panicValue };
   });
+
+  const panicFinalValue = cashFromSale + (totalInvested - atTrough.invested);
+
+  return {
+    timeline,
+    risk: {
+      maxDrawdownPct: maxDrawdownPct * 100,
+      maxDrawdownPeakDate: peakDate,
+      maxDrawdownTroughDate: troughDate,
+      timeUnderwaterPct: investedPoints > 0 ? (underwaterCount / investedPoints) * 100 : 0,
+    },
+    panic: {
+      sellDate: troughDate,
+      finalValue: panicFinalValue,
+      costOfPanic: finalValue - panicFinalValue,
+    },
+  };
 }
