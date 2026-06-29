@@ -17,9 +17,9 @@ import { RiskDisclaimer } from "@/components/simulator/RiskDisclaimer";
 
 const DEFAULT_INPUT: SimulationInput = {
   crypto: "bitcoin",
-  amount: 100,
+  amount: 50,
   frequency: "monthly",
-  startDate: "2020-01-01",
+  startDate: "2024-07-01",
   endDate: "2026-06-01",
 };
 
