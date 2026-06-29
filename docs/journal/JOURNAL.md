@@ -7,6 +7,25 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-29] Assistant langage naturel (signal Dev IA)
+
+### Contexte
+- Feature #3 de la vision : le pont vers le vrai besoin S'investir (agents IA). « Décris ton scénario » → pré-remplit le formulaire.
+
+### Décisions
+- **Parseur par règles 100 % local** (`parseScenario.ts`) : détecte crypto, montant (sans confondre avec l'année), fréquence (one-shot/DCA), et dates (« depuis 2020 », « en 2021 », « de janvier 2021 à 2024 »).
+- **Interface `ScenarioParser`** isolée → branchable à un LLM (route API serveur) plus tard sans toucher l'UI. Choix assumé : démo **incassable**, aucune clé API, déterministe.
+- **UI `ScenarioAssistant`** : champ + bouton « Pré-remplir » + exemples cliquables + chips « Compris : … », placé en haut, pleine largeur.
+- **Tests** : +5 (phrases types, anti-confusion année/montant, non-reconnu). 19/19 verts.
+
+### Choix & justifications
+- Règles plutôt que LLM pour le jour J (stabilité), mais **archi agent-ready** pour montrer la pensée produit/IA. Aligné poste Dev IA + garde-fous conformité (aucun conseil).
+
+### Prochaines étapes
+- Pass design 2026 (motion/storytelling) avec les mockups GPT.
+
+---
+
 ## [2026-06-29] Mise en perspective : crypto vs ETF Monde vs Livret A
 
 ### Contexte

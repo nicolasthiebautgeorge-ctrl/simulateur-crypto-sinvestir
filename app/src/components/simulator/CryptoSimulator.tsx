@@ -7,6 +7,7 @@ import { calculateBenchmarks } from "@/lib/simulation/calculateBenchmarks";
 import { localProvider } from "@/lib/market-data/marketDataProvider";
 import { Card } from "@/components/ui/Card";
 import { SimulatorForm } from "@/components/simulator/SimulatorForm";
+import { ScenarioAssistant } from "@/components/simulator/ScenarioAssistant";
 import { ResultsCards } from "@/components/simulator/ResultsCards";
 import { BehaviorInsight } from "@/components/simulator/BehaviorInsight";
 import { BenchmarkComparison } from "@/components/simulator/BenchmarkComparison";
@@ -57,8 +58,11 @@ export function CryptoSimulator({ initialInput }: CryptoSimulatorProps) {
   const hasResult = result.totalInvested > 0;
 
   return (
-    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(320px,380px)_1fr]">
-      <Card className="p-6">
+    <div className="flex flex-col gap-5">
+      <ScenarioAssistant onApply={onChange} />
+
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(320px,380px)_1fr]">
+        <Card className="p-6">
         <h2 className="font-display text-lg font-semibold">Paramètres</h2>
         <p className="mt-1 text-sm text-text-muted">
           Configurez votre scénario d&apos;investissement.
@@ -113,6 +117,7 @@ export function CryptoSimulator({ initialInput }: CryptoSimulatorProps) {
         )}
 
         <RiskDisclaimer />
+      </div>
       </div>
     </div>
   );
