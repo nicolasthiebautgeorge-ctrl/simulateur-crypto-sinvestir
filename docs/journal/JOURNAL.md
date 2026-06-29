@@ -7,6 +7,27 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-29] Direction artistique 2026 : nouveau logo + motion & effets
+
+### Contexte
+- Constat : la fidélité seule ne démarque pas (cf. clone damien K). Objectif : élever l'exécution visuelle sans trahir la marque. Mockups GPT analysés via une nouvelle règle d'expert.
+
+### Décisions
+- **2 règles `.mdc`** : `ui-ux-expert` (direction artistique/critique) + `ui-motion-effects` (intégration motion/effets, React web — pas React Native).
+- **Logo** : monogramme « S » doré affiné (transparent) + wordmark « S'investir » en dégradé doré CSS + « Simulateurs » letterspacé, dans le header.
+- **Motion** (Framer Motion `motion/react`) : `AnimatedNumber` (count-up sur la valeur héro) + `Reveal` (apparition en cascade des sections). Respect `prefers-reduced-motion`.
+- **Effets** : boutons stratégie avec **icônes Lucide** + **glow** marque + `active:scale`, **slider** de montant (thumb doré), lueur bleue discrète sur la carte graphique.
+- **Mockups** régénérés (logo-v2, mockup-v2-home avec assistant IA, mockup-v2-discipline) dans `assets/`.
+
+### Choix & justifications
+- React web + Framer Motion + Lucide (pas React Native : projet Next.js). Effets subtils (<280ms), démo stable (build/tests OK, 19/19).
+- Logo en code (monogramme PNG transparent + texte dégradé) → net, theme-able, pas de fond baké.
+
+### Prochaines étapes
+- Itérer le pass design section par section selon retours ; éventuel restyle assistant + cartes glassy.
+
+---
+
 ## [2026-06-29] Assistant langage naturel (signal Dev IA)
 
 ### Contexte

@@ -7,6 +7,7 @@ import {
   formatSignedCurrency,
 } from "@/lib/formatters";
 import { CRYPTOS } from "@/lib/market-data/cryptoDataset";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 
 interface ResultsCardsProps {
   result: SimulationResult;
@@ -133,13 +134,13 @@ export function ResultsCards({ result }: ResultsCardsProps) {
       {/* Carte principale : valeur finale + composition */}
       <div className="rounded-2xl border border-white/10 bg-surface-soft/40 p-5">
         <p className="text-xs text-text-muted">Valeur finale du portefeuille</p>
-        <p
-          className={`mt-1 font-display text-3xl font-semibold tracking-tight tabular-nums ${
+        <AnimatedNumber
+          value={result.finalValue}
+          format={(n) => formatCurrency(n, currency)}
+          className={`mt-1 block font-display text-3xl font-semibold tracking-tight tabular-nums ${
             isGain ? "text-success" : "text-error"
           }`}
-        >
-          {formatCurrency(result.finalValue, currency)}
-        </p>
+        />
         <p className="mt-0.5 text-xs text-text-muted">
           {formatQuantity(result.quantity)} {symbol}
         </p>

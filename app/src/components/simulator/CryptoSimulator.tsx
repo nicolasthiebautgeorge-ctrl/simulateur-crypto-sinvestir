@@ -6,6 +6,7 @@ import { calculateSimulation } from "@/lib/simulation/calculateSimulation";
 import { calculateBenchmarks } from "@/lib/simulation/calculateBenchmarks";
 import { localProvider } from "@/lib/market-data/marketDataProvider";
 import { Card } from "@/components/ui/Card";
+import { Reveal } from "@/components/ui/Reveal";
 import { SimulatorForm } from "@/components/simulator/SimulatorForm";
 import { ScenarioAssistant } from "@/components/simulator/ScenarioAssistant";
 import { ResultsCards } from "@/components/simulator/ResultsCards";
@@ -91,21 +92,29 @@ export function CryptoSimulator({ initialInput }: CryptoSimulatorProps) {
 
         {hasResult ? (
           <>
-            <ResultsCards result={result} />
-            <Card className="p-6">
-              <div className="mb-4 flex items-baseline justify-between">
-                <h2 className="font-display text-lg font-semibold">Évolution</h2>
-                <span className="text-xs text-text-muted">
-                  {result.effectiveRange.start} → {result.effectiveRange.end}
-                </span>
-              </div>
-              <PerformanceChart
-                data={result.timeline}
-                currency={result.currency}
-              />
-            </Card>
-            <BehaviorInsight result={result} />
-            <BenchmarkComparison result={result} benchmarks={benchmarks} />
+            <Reveal>
+              <ResultsCards result={result} />
+            </Reveal>
+            <Reveal delay={0.06}>
+              <Card className="p-6 shadow-[0_0_60px_-20px_var(--color-brand)]">
+                <div className="mb-4 flex items-baseline justify-between">
+                  <h2 className="font-display text-lg font-semibold">Évolution</h2>
+                  <span className="text-xs text-text-muted">
+                    {result.effectiveRange.start} → {result.effectiveRange.end}
+                  </span>
+                </div>
+                <PerformanceChart
+                  data={result.timeline}
+                  currency={result.currency}
+                />
+              </Card>
+            </Reveal>
+            <Reveal delay={0.12}>
+              <BehaviorInsight result={result} />
+            </Reveal>
+            <Reveal delay={0.18}>
+              <BenchmarkComparison result={result} benchmarks={benchmarks} />
+            </Reveal>
           </>
         ) : (
           <Card className="flex min-h-[200px] items-center justify-center p-6">

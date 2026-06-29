@@ -1,3 +1,5 @@
+import { CalendarClock, CalendarDays, CalendarRange, Zap } from "lucide-react";
+import type { ComponentType } from "react";
 import { CRYPTOS } from "@/lib/market-data/cryptoDataset";
 import type {
   CryptoId,
@@ -7,12 +9,18 @@ import type {
 } from "@/lib/simulation/types";
 import { Field, Select, TextInput } from "@/components/ui/Field";
 
-const FREQUENCIES: { value: Frequency; label: string }[] = [
-  { value: "one-shot", label: "Achat unique" },
-  { value: "monthly", label: "DCA mensuel" },
-  { value: "weekly", label: "DCA hebdo" },
-  { value: "daily", label: "DCA quotidien" },
+const FREQUENCIES: {
+  value: Frequency;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+}[] = [
+  { value: "one-shot", label: "Achat unique", icon: Zap },
+  { value: "monthly", label: "DCA mensuel", icon: CalendarDays },
+  { value: "weekly", label: "DCA hebdo", icon: CalendarRange },
+  { value: "daily", label: "DCA quotidien", icon: CalendarClock },
 ];
+
+const AMOUNT_SLIDER_MAX = 1000;
 
 interface SimulatorFormProps {
   value: SimulationInput;
@@ -50,19 +58,23 @@ export function SimulatorForm({
         <div className="grid grid-cols-2 gap-2">
           {FREQUENCIES.map((f) => {
             const active = value.frequency === f.value;
+            const Icon = f.icon;
             return (
               <button
                 key={f.value}
                 type="button"
                 aria-pressed={active}
                 onClick={() => onChange({ frequency: f.value })}
-                className={`rounded-xl border px-3 py-2.5 text-sm transition-colors ${
+                className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition-all duration-200 active:scale-[.98] ${
                   active
-                    ? "border-brand bg-brand/15 text-text"
-                    : "border-white/10 bg-surface-soft/40 text-text-muted hover:border-white/20"
+                    ? "border-brand bg-brand/15 text-text shadow-[0_0_0_1px_var(--color-brand),0_0_24px_-6px_var(--color-brand)]"
+                    : "border-white/10 bg-surface-soft/40 text-text-muted hover:border-white/25 hover:text-text"
                 }`}
               >
-                {f.label}
+                <Icon
+                  className={`h-4 w-4 shrink-0 ${active ? "text-brand-light" : "text-text-muted"}`}
+                />
+                <span className="truncate">{f.label}</span>
               </button>
             );
           })}
@@ -84,6 +96,17 @@ export function SimulatorForm({
             {currency}
           </span>
         </div>
+        <input
+          type="range"
+          aria-label={`${amountLabel} (curseur)`}
+          min={10}
+          max={AMOUNT_SLIDER_MAX}
+          step={10}
+          value={Math.min(Math.max(value.amount || 0, 10), AMOUNT_SLIDER_MAX)}
+          onChange={(e) => onChange({ amount: Number(e.target.value) })}
+          style={{ accentColor: "var(--color-gold)" }}
+          className="mt-2 w-full cursor-pointer"
+        />
       </Field>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
