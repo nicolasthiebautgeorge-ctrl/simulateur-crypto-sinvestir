@@ -7,6 +7,24 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-18] Vérif prod + URL propre + diagnostic Deployment Protection
+
+### Contexte
+- Reprise après le polish UI (refonte cartes résultats + en-tête fidèle au design S'investir), déjà commité/poussé et déployé en prod.
+
+### Décisions / constats
+- **Vérification en ligne** de la prod : l'alias public `https://app-ashy-one-53.vercel.app` affiche bien la nouvelle UI (barre empilée bleu/or, indicateurs, synthèse FR, graphique). C'est le **lien de démo à utiliser**.
+- **URL propre** créée via `vercel alias` : `https://simulateur-crypto-sinvestir-demo.vercel.app` (les noms plus courts étaient déjà pris globalement).
+- **Diagnostic bloquant** : la **Deployment Protection (Vercel Authentication)** est activée sur le projet. Le domaine de prod par défaut (`app-ashy-one-53`) est exempté (public), mais **les URLs de déploiement par hash ET l'alias custom tombent sur le login Vercel**.
+- **`vercel git connect` via CLI impossible** ici : `.git` est à la racine `d:\sinvestir` alors que le projet Vercel est lié au sous-dossier `app/` (setup "monorepo"). À faire au dashboard avec Root Directory = `app`.
+
+### Prochaines étapes (actions utilisateur, dashboard)
+1. **Settings → Deployment Protection → Vercel Authentication = Off** → rend l'URL propre et tous les liens publics.
+2. **Import du repo GitHub** dans le projet (Root Directory = `app`) pour activer l'auto-deploy sur push `main`.
+3. (Optionnel) Renommer le projet `app` → `simulateur-crypto-sinvestir` pour un domaine par défaut plus propre.
+
+---
+
 ## [2026-06-18] Cadrage stratégique (synthèse reviewer technique)
 
 ### Contexte
