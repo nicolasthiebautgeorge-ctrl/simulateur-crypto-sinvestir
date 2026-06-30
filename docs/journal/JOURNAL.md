@@ -7,6 +7,27 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-30] Mode vocal nouvelle génération (gpt-audio, voix marin/cedar)
+
+### Contexte
+- Objectif « waouh » : voix réaliste, plus humaine que `tts-1-hd`. Test API : `gpt-audio`/`gpt-realtime-2` accessibles sur la clé.
+
+### Décisions
+- **Mode vocal natif** via nouvelle route `/api/voice` : le modèle **`gpt-audio-mini`** génère la **réponse + la voix réaliste** (voix `marin`) en un seul appel (chat completions, `modalities:["text","audio"]`). On affiche la transcription dans la bulle → **texte et audio coïncident**.
+- **`CoachPanel`** : mode vocal **par défaut** (voix active). Repli automatique sur le chemin texte (`/api/advisor` + `tts-1-hd`) si `/api/voice` indispo (204/erreur/rate-limit).
+- **Réécoute exacte** : l'audio réaliste généré est conservé (URL d'objet) et rejoué tel quel par le bouton « réécouter » ; pour les messages texte, réécoute via `tts-1-hd` verbatim.
+- Garde-fous : rate-limit `voice` 12/min (mode coûteux), URLs audio révoquées au démontage.
+- Env : `OPENAI_AUDIO_MODEL=gpt-audio-mini`, `OPENAI_AUDIO_VOICE=marin`.
+
+### Choix & justifications
+- `gpt-audio` est **conversationnel** (ne lit pas verbatim) → on l'utilise comme *générateur de réponse vocale*, pas comme TTS. La bulle = sa transcription, donc cohérence parfaite voix/texte.
+- Realtime (`gpt-realtime-2`) écarté pour l'instant : speech-to-speech temps réel = WebRTC + micro, trop lourd/risqué pour la démo. Piste future documentée.
+
+### Prochaines étapes
+- Vérifier en prod (`/api/voice` → reply + audio). Option future : conversation temps réel Realtime. Loom + dépôt Tally.
+
+---
+
 ## [2026-06-30] Modèles OpenAI 2026 + voix audible (compresseur/gain) + audio au centre
 
 ### Contexte

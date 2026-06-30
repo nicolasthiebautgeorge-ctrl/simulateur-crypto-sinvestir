@@ -10,6 +10,17 @@ interface CoachPanelProps {
   context: AdvisorContext;
 }
 
+/** Message d'affichage : peut porter l'audio réaliste déjà généré (mode vocal). */
+type ChatMsg = { role: "user" | "assistant"; content: string; audioUrl?: string };
+
+/** base64 (mp3) → URL d'objet jouable. */
+function b64ToBlobUrl(b64: string): string {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+  return URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" }));
+}
+
 const SUGGESTIONS = [
   "Quel est le risque ?",
   "Et si j'avais paniqué ?",
@@ -32,7 +43,7 @@ function speakWebSpeech(text: string) {
 }
 
 export function CoachPanel({ context }: CoachPanelProps) {
-  const [messages, setMessages] = useState<AdvisorMessage[]>(() => [
+  const [messages, setMessages] = useState<ChatMsg[]>(() => [
     answerWithMock([], context).reply,
   ].map((content) => ({ role: "assistant" as const, content })));
   const [input, setInput] = useState("");
@@ -47,6 +58,8 @@ export function CoachPanel({ context }: CoachPanelProps) {
   // Web Audio : compresseur + gain pour remonter la voix (un <audio> plafonne à 1.0).
   const audioCtxRef = useRef<AudioContext | null>(null);
   const graphRef = useRef<{ source: MediaElementAudioSourceNode } | null>(null);
+  // URLs d'objets audio conservées (réécoute exacte) → révoquées au démontage.
+  const urlsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -55,9 +68,14 @@ export function CoachPanel({ context }: CoachPanelProps) {
     });
   }, [messages, loading]);
 
-  // Coupe la voix (audio + Web Speech) au démontage.
+  // Coupe la voix et libère les audios au démontage.
   useEffect(() => {
-    return () => stopVoice();
+    const urls = urlsRef.current;
+    return () => {
+      stopVoice();
+      urls.forEach((u) => URL.revokeObjectURL(u));
+      urls.clear();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -136,9 +154,39 @@ export function CoachPanel({ context }: CoachPanelProps) {
   }
 
   /**
-   * Lit un texte à voix haute (voix neuronale OpenAI via /api/tts ; repli Web
-   * Speech). Inconditionnel : utilisé par le bouton « réécouter ». `idx`
-   * permet de suivre quel message est en cours de lecture.
+   * Joue une URL audio (amplifiée). `revokeOnEnd` à false pour les audios
+   * conservés (réécoute exacte du mode vocal).
+   */
+  async function playUrl(url: string, idx: number | null, revokeOnEnd: boolean) {
+    stopVoice();
+    setSpeaking(true);
+    setPlayingIdx(idx);
+    const audio = new Audio(url);
+    audio.volume = 1;
+    audioRef.current = audio;
+    amplify(audio);
+    const cleanup = () => {
+      if (revokeOnEnd) URL.revokeObjectURL(url);
+      if (graphRef.current) {
+        try {
+          graphRef.current.source.disconnect();
+        } catch {
+          // déjà déconnecté
+        }
+        graphRef.current = null;
+      }
+      if (audioRef.current === audio) audioRef.current = null;
+      setSpeaking(false);
+      setPlayingIdx(null);
+    };
+    audio.onended = cleanup;
+    audio.onerror = cleanup;
+    await audio.play();
+  }
+
+  /**
+   * Lit un texte via la voix neuronale OpenAI (/api/tts, lecture verbatim) ;
+   * repli Web Speech. Utilisé pour les messages sans audio pré-généré.
    */
   async function speak(text: string, idx: number | null = null) {
     stopVoice();
@@ -151,30 +199,9 @@ export function CoachPanel({ context }: CoachPanelProps) {
         body: JSON.stringify({ text }),
       });
       const type = res.headers.get("content-type") ?? "";
-      if (res.ok && type.includes("audio")) {
+      if (res.ok && res.status !== 204 && type.includes("audio")) {
         const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audio.volume = 1;
-        audioRef.current = audio;
-        amplify(audio);
-        const cleanup = () => {
-          URL.revokeObjectURL(url);
-          if (graphRef.current) {
-            try {
-              graphRef.current.source.disconnect();
-            } catch {
-              // déjà déconnecté
-            }
-            graphRef.current = null;
-          }
-          if (audioRef.current === audio) audioRef.current = null;
-          setSpeaking(false);
-          setPlayingIdx(null);
-        };
-        audio.onended = cleanup;
-        audio.onerror = cleanup;
-        await audio.play();
+        await playUrl(URL.createObjectURL(blob), idx, true);
         return;
       }
     } catch {
@@ -189,35 +216,78 @@ export function CoachPanel({ context }: CoachPanelProps) {
     void speak(text, idx);
   }
 
-  /** Bouton « réécouter » : relit, ou coupe si ce message parle déjà. */
-  function toggleReplay(text: string, idx: number) {
+  /** Bouton « réécouter » : rejoue l'audio exact si dispo, sinon TTS verbatim. */
+  function toggleReplay(m: ChatMsg, idx: number) {
     if (playingIdx === idx) {
       stopVoice();
       return;
     }
-    void speak(text, idx);
+    if (m.audioUrl) {
+      void playUrl(m.audioUrl, idx, false);
+    } else {
+      void speak(m.content, idx);
+    }
+  }
+
+  /**
+   * Mode vocal : gpt-audio génère réponse + voix réaliste en un appel.
+   * Renvoie true si une réponse vocale a été ajoutée, false → repli texte.
+   */
+  async function sendVoice(
+    payload: AdvisorMessage[],
+    idx: number,
+  ): Promise<boolean> {
+    try {
+      const res = await fetch("/api/voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: payload, context }),
+      });
+      if (!res.ok || res.status === 204) return false;
+      const data = (await res.json().catch(() => null)) as {
+        reply?: string;
+        audio?: string;
+      } | null;
+      if (!data?.reply || !data?.audio) return false;
+      const url = b64ToBlobUrl(data.audio);
+      urlsRef.current.add(url);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.reply!, audioUrl: url },
+      ]);
+      void playUrl(url, idx, false);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async function send(question: string) {
     const q = question.trim();
     if (!q || loading) return;
-    const next: AdvisorMessage[] = [...messages, { role: "user", content: q }];
+    const next: ChatMsg[] = [...messages, { role: "user", content: q }];
     setMessages(next);
     setInput("");
     setLoading(true);
+    const payload: AdvisorMessage[] = next.map(({ role, content }) => ({
+      role,
+      content,
+    }));
     try {
+      // Voix active → réponse vocale native (gpt-audio), avec repli texte.
+      if (voiceOn && (await sendVoice(payload, next.length))) return;
+
       const res = await fetch("/api/advisor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, context }),
+        body: JSON.stringify({ messages: payload, context }),
       });
       const data = (await res.json()) as { reply?: string };
-      const reply =
-        data.reply ?? answerWithMock(next, context).reply;
+      const reply = data.reply ?? answerWithMock(payload, context).reply;
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       say(reply, next.length);
     } catch {
-      const reply = answerWithMock(next, context).reply;
+      const reply = answerWithMock(payload, context).reply;
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       say(reply, next.length);
     } finally {
@@ -292,7 +362,7 @@ export function CoachPanel({ context }: CoachPanelProps) {
             {m.role === "assistant" ? (
               <button
                 type="button"
-                onClick={() => toggleReplay(m.content, i)}
+                onClick={() => toggleReplay(m, i)}
                 aria-label={
                   playingIdx === i ? "Arrêter la lecture" : "Réécouter la réponse"
                 }
