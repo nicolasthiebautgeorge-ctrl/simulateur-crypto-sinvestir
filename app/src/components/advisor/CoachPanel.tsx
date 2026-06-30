@@ -41,6 +41,9 @@ export function CoachPanel({ context }: CoachPanelProps) {
   const [voiceOn, setVoiceOn] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Web Audio : compresseur + gain pour remonter la voix (un <audio> plafonne à 1.0).
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const graphRef = useRef<{ source: MediaElementAudioSourceNode } | null>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -60,10 +63,54 @@ export function CoachPanel({ context }: CoachPanelProps) {
       audioRef.current.pause();
       audioRef.current = null;
     }
+    if (graphRef.current) {
+      try {
+        graphRef.current.source.disconnect();
+      } catch {
+        // déjà déconnecté
+      }
+      graphRef.current = null;
+    }
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
     setSpeaking(false);
+  }
+
+  /**
+   * Branche l'<audio> sur un compresseur + gain (≈ 2.4×) pour une voix bien
+   * audible. Retourne false si le Web Audio API n'est pas dispo → lecture brute.
+   */
+  function amplify(audio: HTMLAudioElement): boolean {
+    try {
+      const Ctx =
+        window.AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
+      if (!Ctx) return false;
+
+      const ctx = audioCtxRef.current ?? new Ctx();
+      audioCtxRef.current = ctx;
+      if (ctx.state === "suspended") void ctx.resume();
+
+      const source = ctx.createMediaElementSource(audio);
+      const compressor = ctx.createDynamicsCompressor();
+      compressor.threshold.value = -28;
+      compressor.knee.value = 28;
+      compressor.ratio.value = 12;
+      compressor.attack.value = 0.003;
+      compressor.release.value = 0.25;
+      const gain = ctx.createGain();
+      gain.gain.value = 2.4;
+
+      source.connect(compressor);
+      compressor.connect(gain);
+      gain.connect(ctx.destination);
+      graphRef.current = { source };
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /** Repli Web Speech avec suivi de l'état "parle". */
@@ -98,9 +145,19 @@ export function CoachPanel({ context }: CoachPanelProps) {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
+        audio.volume = 1;
         audioRef.current = audio;
+        amplify(audio);
         const cleanup = () => {
           URL.revokeObjectURL(url);
+          if (graphRef.current) {
+            try {
+              graphRef.current.source.disconnect();
+            } catch {
+              // déjà déconnecté
+            }
+            graphRef.current = null;
+          }
           if (audioRef.current === audio) audioRef.current = null;
           setSpeaking(false);
         };
