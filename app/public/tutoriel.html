@@ -146,6 +146,7 @@
     <h2>2. Lire les résultats</h2>
     <p class="lead">Pas juste « combien j'aurais gagné » — l'outil explique aussi le risque et le comportement.</p>
     <ul class="clean">
+      <li><b>Cours en direct</b> : le prix réel du jour (variations 24h / 7j / 30j, écart au plus-haut), mis à jour automatiquement (source publique CoinGecko).</li>
       <li><b>Valeur finale</b> du portefeuille, <b>montant investi</b> et nombre de versements.</li>
       <li><b>Plus / moins-value</b> en euros et en pourcentage.</li>
       <li><b>Graphique</b> à 3 courbes : investi, valeur réelle, et « si vous aviez paniqué ».</li>
@@ -183,16 +184,44 @@
     </div>
   </section>
 
+  <!-- COACH IA -->
+  <section>
+    <h2>4. Un coach IA expert (et qui parle)</h2>
+    <p class="lead">Pas un perroquet : un coach crypto qui s'appuie sur des données réelles et qui assume une posture, dans le cadre régulé.</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <span class="pill">Décrire en une phrase</span>
+        <h3>🗣️ Langage naturel</h3>
+        <p>Tapez « 200 € par mois sur Bitcoin depuis 2020 » : le formulaire se construit tout seul.</p>
+      </div>
+      <div class="card">
+        <span class="pill">3 sources</span>
+        <h3>🧠 Expert, pas générique</h3>
+        <p>Il combine vos chiffres de simulation, les fluctuations historiques de la crypto (volatilité, krachs, cycles) et le marché en temps réel.</p>
+      </div>
+      <div class="card">
+        <span class="pill">Voix réaliste</span>
+        <h3>🔊 L'audio au centre</h3>
+        <p>Le coach parle avec une voix réaliste ; chaque réponse peut être réécoutée d'un clic.</p>
+      </div>
+      <div class="card">
+        <span class="pill">Conforme</span>
+        <h3>⚖️ Confiant, jamais hors-la-loi</h3>
+        <p>Il recommande des méthodes avec assurance (discipline, DCA, horizon long) sans conseil personnalisé ni promesse de rendement.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- APERCU LIVE -->
   <section id="apercu">
-    <h2>4. Aperçu live (intégré ici)</h2>
+    <h2>5. Aperçu live (intégré ici)</h2>
     <p class="lead">Le simulateur est embarquable dans n'importe quelle page via une iframe — exactement comme dans vos articles. En voici la preuve, ci-dessous :</p>
     <iframe class="preview-frame" src="https://simulateur-crypto-sinvestir-demo.vercel.app/embed?crypto=bitcoin&frequency=monthly&amount=100&start=2020-01-01&end=2026-06-01" title="Simulateur Crypto S'investir" loading="lazy"></iframe>
   </section>
 
   <!-- POURQUOI VIABLE -->
   <section>
-    <h2>5. Pourquoi c'est déjà viable</h2>
+    <h2>6. Pourquoi c'est déjà viable</h2>
     <div class="grid grid-3">
       <div class="card">
         <h3>👤 Pour l'utilisateur</h3>
@@ -204,7 +233,7 @@
       </div>
       <div class="card">
         <h3>🛠️ Côté technique</h3>
-        <p>Logique métier pure et testée, source de données interchangeable, couche IA optionnelle avec repli automatique : la démo ne tombe jamais.</p>
+        <p>Logique métier pure et testée, source de données interchangeable, prix temps réel mis en cache, IA et secrets côté serveur avec repli automatique : la démo ne tombe jamais.</p>
       </div>
     </div>
   </section>

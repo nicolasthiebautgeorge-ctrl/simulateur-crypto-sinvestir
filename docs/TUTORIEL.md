@@ -28,6 +28,7 @@ Chaque changement **recalcule instantanément** les résultats et le graphique.
 
 ## 2. Lire les résultats
 
+- **Cours en direct** — en tête des résultats, le **prix réel du jour** (variations 24h / 7j / 30j, écart au plus-haut), mis à jour automatiquement via une source publique (CoinGecko).
 - **Valeur finale du portefeuille** — ce que vaudrait votre investissement aujourd'hui.
 - **Montant investi / nombre de versements** — ce que vous avez réellement mis.
 - **Plus / moins-value** (€ et %) — le gain ou la perte.
@@ -56,10 +57,15 @@ Chaque changement **recalcule instantanément** les résultats et le graphique.
 
 ---
 
-## 4. L'assistant en langage naturel + le coach
+## 4. L'assistant en langage naturel + le coach IA
 
 - **Pré-remplir en une phrase** : tapez par exemple *« 200 € par mois sur Bitcoin depuis 2020 »* → le formulaire se remplit tout seul.
-- **Coach S'investir IA** : posez une question (« quel est le risque ? », « pourquoi le DCA ? ») → il répond **à partir de vos chiffres réels**, en restant **pédagogique** (jamais de conseil personnalisé, secteur régulé oblige). Une voix peut lire la réponse.
+- **Coach S'investir IA — un vrai expert crypto** : posez une question (« quel est le risque ? », « le Bitcoin est-il trop volatil ? », « le marché est comment en ce moment ? »). Il répond en s'appuyant sur **trois sources** :
+  1. **vos chiffres réels** (la simulation en cours),
+  2. les **fluctuations historiques** de la crypto (volatilité, ampleur des krachs, cycles),
+  3. le **marché en temps réel** (prix et tendances du jour).
+- **Ton de coach assumé** : il prend position avec assurance sur la **méthode** (discipline, régularité, horizon long, gestion du risque) — **sans jamais donner de conseil d'investissement personnalisé** (secteur régulé), ni promettre de rendement.
+- **La voix au centre** : par défaut, le coach **parle** avec une voix réaliste. Chaque réponse peut être **réécoutée** d'un clic.
 
 ---
 
@@ -76,16 +82,16 @@ Chaque changement **recalcule instantanément** les résultats et le graphique.
 
 **Côté technique (fiabilité)**
 - **Logique métier pure et testée** (suite de tests unitaires) → les calculs sont vérifiés.
-- **Aucune dépendance externe qui casse** : dataset historique local par défaut, derrière une **abstraction de source de données** remplaçable (on peut brancher une API marché sans toucher à l'interface).
-- **Couche IA optionnelle** : si une clé est absente ou en erreur, l'assistant **bascule automatiquement** sur une version locale fiable → la démo ne tombe jamais.
+- **Aucune dépendance externe qui casse** : dataset historique local par défaut, derrière une **abstraction de source de données** remplaçable. Le **prix temps réel** passe par un proxy serveur **mis en cache** ; s'il est indisponible, le bloc se masque sans rien casser.
+- **Couche IA robuste** : conseil et voix gérés **côté serveur**, avec **repli automatique** en cascade (modèle texte, puis voix de secours, puis version locale déterministe) → la démo ne tombe jamais.
 
 ---
 
 ## 6. Limites assumées & suite
 
-- Données historiques **approximatives** à but pédagogique (pas un flux temps réel).
+- Le **backtest** s'appuie sur un historique **approximatif** à but pédagogique (la *forme* des cycles, pas des cotations officielles). En revanche, le **cours affiché et le coach utilisent un prix temps réel** via une source publique.
 - Pas de conseil personnalisé (volontaire : conformité).
 
-**Prochaines étapes** : conseil IA branché sur un vrai modèle (déjà câblé, prêt à activer), partage d'un résultat en image, et à terme un copilote qui combine données publiques (marché) et privées (objectifs de l'utilisateur, avec consentement).
+**Prochaines étapes** : passer du coach au **copilote** en combinant données publiques (marché, déjà branché) et privées (objectifs, horizon, tolérance au risque de l'utilisateur — avec son consentement) ; partage d'un résultat en image ; backtest sur cotations officielles via la source de données déjà abstraite.
 
 > En résumé : ce n'est pas une démo qui « fait joli ». C'est un outil **utilisable aujourd'hui**, **fiable**, **embarquable**, et pensé pour devenir le copilote crypto de S'investir.

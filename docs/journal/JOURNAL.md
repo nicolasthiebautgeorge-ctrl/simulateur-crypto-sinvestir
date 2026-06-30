@@ -7,6 +7,17 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-30] MAJ communication : mail + tutoriel alignés sur les nouveautés
+
+### Contexte
+- L'assistant est passé de « fondations » à réellement vivant (expert, temps réel, voix). Le mail et le tuto devaient le refléter.
+
+### Décisions
+- **Mail** (`perso/mail-vision.txt`) : assistant présenté comme **déjà vivant** (coach expert : simulation + historique + temps réel, voix réaliste, garde-fous AMF) ; lien du tuto HTML ajouté ; prochaine marche = copilote avec données privées.
+- **Tutoriel** (`docs/TUTORIEL.md` + `app/public/tutoriel.html`) : ajout du **cours en direct**, nouvelle section **coach IA expert (3 sources + voix)**, limites/sections technique mises à jour (temps réel + repli serveur).
+
+---
+
 ## [2026-06-30] Cours en direct affiché dans l'UI (CoinGecko)
 
 ### Contexte
