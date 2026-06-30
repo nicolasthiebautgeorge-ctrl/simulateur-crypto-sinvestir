@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, Volume2, VolumeX } from "lucide-react";
+import { Send, Sparkles, Square, Volume2, VolumeX } from "lucide-react";
 import type { AdvisorContext, AdvisorMessage } from "@/lib/advisor/types";
 import { answerWithMock } from "@/lib/advisor/mockAdvisor";
 import { CoachAvatar, type CoachState } from "@/components/advisor/CoachAvatar";
@@ -38,7 +38,10 @@ export function CoachPanel({ context }: CoachPanelProps) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [speaking, setSpeaking] = useState(false);
-  const [voiceOn, setVoiceOn] = useState(false);
+  // Audio au centre de l'expérience : la voix est active par défaut.
+  const [voiceOn, setVoiceOn] = useState(true);
+  // Index du message en cours de lecture (pour l'état du bouton « réécouter »).
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   // Web Audio : compresseur + gain pour remonter la voix (un <audio> plafonne à 1.0).
@@ -75,6 +78,7 @@ export function CoachPanel({ context }: CoachPanelProps) {
       window.speechSynthesis.cancel();
     }
     setSpeaking(false);
+    setPlayingIdx(null);
   }
 
   /**
@@ -118,6 +122,7 @@ export function CoachPanel({ context }: CoachPanelProps) {
     const ok = speakWebSpeech(text);
     if (!ok || typeof window === "undefined") {
       setSpeaking(false);
+      setPlayingIdx(null);
       return;
     }
     const synth = window.speechSynthesis;
@@ -125,15 +130,20 @@ export function CoachPanel({ context }: CoachPanelProps) {
       if (!synth.speaking) {
         clearInterval(poll);
         setSpeaking(false);
+        setPlayingIdx(null);
       }
     }, 250);
   }
 
-  /** Voix neuronale OpenAI (via /api/tts) ; repli Web Speech si indispo. */
-  async function say(text: string) {
-    if (!voiceOn) return;
+  /**
+   * Lit un texte à voix haute (voix neuronale OpenAI via /api/tts ; repli Web
+   * Speech). Inconditionnel : utilisé par le bouton « réécouter ». `idx`
+   * permet de suivre quel message est en cours de lecture.
+   */
+  async function speak(text: string, idx: number | null = null) {
     stopVoice();
     setSpeaking(true);
+    setPlayingIdx(idx);
     try {
       const res = await fetch("/api/tts", {
         method: "POST",
@@ -160,6 +170,7 @@ export function CoachPanel({ context }: CoachPanelProps) {
           }
           if (audioRef.current === audio) audioRef.current = null;
           setSpeaking(false);
+          setPlayingIdx(null);
         };
         audio.onended = cleanup;
         audio.onerror = cleanup;
@@ -170,6 +181,21 @@ export function CoachPanel({ context }: CoachPanelProps) {
       // ignore → repli
     }
     fallbackVoice(text);
+  }
+
+  /** Lecture auto d'une nouvelle réponse, seulement si la voix est active. */
+  function say(text: string, idx: number | null = null) {
+    if (!voiceOn) return;
+    void speak(text, idx);
+  }
+
+  /** Bouton « réécouter » : relit, ou coupe si ce message parle déjà. */
+  function toggleReplay(text: string, idx: number) {
+    if (playingIdx === idx) {
+      stopVoice();
+      return;
+    }
+    void speak(text, idx);
   }
 
   async function send(question: string) {
@@ -189,11 +215,11 @@ export function CoachPanel({ context }: CoachPanelProps) {
       const reply =
         data.reply ?? answerWithMock(next, context).reply;
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-      say(reply);
+      say(reply, next.length);
     } catch {
       const reply = answerWithMock(next, context).reply;
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-      say(reply);
+      say(reply, next.length);
     } finally {
       setLoading(false);
     }
@@ -250,7 +276,9 @@ export function CoachPanel({ context }: CoachPanelProps) {
         {messages.map((m, i) => (
           <div
             key={i}
-            className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex flex-col gap-1 ${
+              m.role === "user" ? "items-end" : "items-start"
+            }`}
           >
             <p
               className={`max-w-[85%] whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
@@ -261,6 +289,33 @@ export function CoachPanel({ context }: CoachPanelProps) {
             >
               {m.content}
             </p>
+            {m.role === "assistant" ? (
+              <button
+                type="button"
+                onClick={() => toggleReplay(m.content, i)}
+                aria-label={
+                  playingIdx === i ? "Arrêter la lecture" : "Réécouter la réponse"
+                }
+                title={playingIdx === i ? "Arrêter" : "Réécouter"}
+                className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-all duration-200 active:scale-95 ${
+                  playingIdx === i
+                    ? "border-gold bg-gold/15 text-gold"
+                    : "border-white/10 bg-surface-soft/40 text-text-muted hover:border-gold/40 hover:text-text"
+                }`}
+              >
+                {playingIdx === i ? (
+                  <>
+                    <Square className="h-3 w-3" />
+                    Lecture…
+                  </>
+                ) : (
+                  <>
+                    <Volume2 className="h-3 w-3" />
+                    Réécouter
+                  </>
+                )}
+              </button>
+            ) : null}
           </div>
         ))}
         {loading ? (

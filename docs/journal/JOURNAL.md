@@ -7,6 +7,31 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-30] Modèles OpenAI 2026 + voix audible (compresseur/gain) + audio au centre
+
+### Contexte
+- En prod, le coach retombait en `mock` malgré une clé valide. Diagnostic : variables d'env Vercel polluées par un `\r\n` (pipe PowerShell) **et** la gamme GPT-5 refuse `max_tokens`/`temperature` custom → erreur 400 → repli mock.
+- Voix jugée trop faible. Demande : audio au centre de l'expérience (voix active par défaut) + bouton « réécouter » par message.
+
+### Décisions
+- **Modèles (catalogue OpenAI réel mi-2026, vérifiés sur la clé)** : conseil → `gpt-5.4-mini` (rapide, bon FR, peu cher ; réglable en `gpt-5.4`/`gpt-5.5`). Voix → `tts-1-hd` sur `/v1/audio/speech` (`gpt-4o-mini-tts` écarté).
+- **Route conseil** : paramètres adaptés GPT-5 → `max_completion_tokens` (au lieu de `max_tokens`) et **pas de `temperature`** custom.
+- **Variables Vercel** : ré-ajoutées proprement via redirection de fichier (sans saut de ligne) pour éliminer le `\r\n`.
+- **Voix amplifiée** (`CoachPanel`) : flux `<audio>` routé dans le **Web Audio API** → `DynamicsCompressor` + `GainNode` (×2.4). Repli lecture brute si non supporté.
+- **Audio central** : voix **active par défaut** ; **bouton « réécouter »** sur chaque réponse de l'assistant (relit / stoppe), avec suivi de l'état de lecture.
+
+### Choix & justifications
+- Un `<audio>` plafonne à `volume = 1.0` → seul le Web Audio permet d'amplifier au-delà de la source ; le compresseur homogénéise et évite la saturation.
+- `tts-1-hd` = qualité sur l'endpoint simple, fiable et léger pour la démo (vraie voix « nouvelle génération » = Realtime `gpt-realtime-2` / `gpt-audio`, plus immersif mais intégration WebRTC plus lourde → piste bonus).
+
+### Vérifs
+- Prod : `/api/advisor` → `source: openai` (réponse `gpt-5.4-mini`) ; `/api/tts` → HTTP 200 (mp3 ~50 Ko). Build + alias OK.
+
+### Prochaines étapes
+- Optionnel : voix réaliste temps réel (Realtime/`gpt-audio`, voix `marin`/`cedar`). Loom + dépôt Tally.
+
+---
+
 ## [2026-06-30] Coach IA : conseil OpenAI (GPT) + voix neuronale OpenAI TTS + garde-fous
 
 ### Contexte
