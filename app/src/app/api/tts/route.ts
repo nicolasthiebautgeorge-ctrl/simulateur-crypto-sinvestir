@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   }
   if (!text) return new NextResponse(null, { status: 204 });
 
-  const model = process.env.OPENAI_TTS_MODEL ?? "gpt-4o-mini-tts";
+  const model = process.env.OPENAI_TTS_MODEL ?? "tts-1-hd";
   const voice = process.env.OPENAI_TTS_VOICE ?? "alloy";
 
   try {

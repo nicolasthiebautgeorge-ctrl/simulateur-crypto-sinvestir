@@ -41,7 +41,9 @@ async function callOpenAI(
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return null;
 
-  const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+  const model = process.env.OPENAI_MODEL ?? "gpt-5.4-mini";
+  // La gamme GPT-5 n'accepte plus `max_tokens` (→ `max_completion_tokens`)
+  // ni une `temperature` personnalisée : on omet ce paramètre.
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -50,8 +52,7 @@ async function callOpenAI(
     },
     body: JSON.stringify({
       model,
-      temperature: 0.5,
-      max_tokens: MAX_TOKENS,
+      max_completion_tokens: MAX_TOKENS,
       messages: chatMessages(messages, ctx),
     }),
   });
