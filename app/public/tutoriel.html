@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tutoriel — Simulateur Crypto S'investir</title>
+<meta name="description" content="Tutoriel du simulateur crypto S'investir : stratégies, montants, périodes. Déjà utilisable, ouvrable dans n'importe quel navigateur." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --surface: #080c16;
+    --surface-2: #0c1426;
+    --elevated: #00173f;
+    --brand: #0049c6;
+    --brand-light: #4f9cf9;
+    --gold: #e4c031;
+    --gold-hi: #f6e3a1;
+    --text: #eef2fb;
+    --text-muted: #9fb0cc;
+    --success: #00c16a;
+    --error: #ef4444;
+    --border: rgba(255,255,255,0.10);
+    --radius: 20px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(0,73,198,0.18), transparent 60%),
+      var(--surface);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+  h1, h2, h3 { font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif; line-height: 1.2; }
+  a { color: inherit; }
+
+  header.top {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 18px 0;
+  }
+  header.top img { height: 46px; width: auto; filter: drop-shadow(0 2px 16px rgba(228,192,49,0.18)); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 999px; padding: 11px 20px; font-weight: 600; font-size: 15px;
+    text-decoration: none; border: 1px solid transparent; cursor: pointer;
+    transition: transform .15s ease, filter .15s ease, background .15s ease;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn-primary { background: var(--brand); color: #fff; box-shadow: 0 10px 30px -10px var(--brand); }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-gold { background: var(--gold); color: #1a1300; }
+  .btn-gold:hover { filter: brightness(1.08); }
+  .btn-ghost { border-color: var(--border); color: var(--text-muted); background: rgba(255,255,255,.02); }
+  .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,.28); }
+
+  .hero { text-align: center; padding: 28px 0 8px; }
+  .hero .kicker { color: var(--gold); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; font-size: 12px; }
+  .hero h1 { font-size: clamp(28px, 5vw, 44px); margin: 12px 0 10px; }
+  .hero p { color: var(--text-muted); max-width: 620px; margin: 0 auto 18px; }
+  .hero .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  .note {
+    margin: 22px auto; max-width: 720px; text-align: center;
+    border: 1px solid var(--border); background: rgba(228,192,49,.05);
+    border-radius: 14px; padding: 12px 16px; color: var(--text-muted); font-size: 14px;
+  }
+  .note b { color: var(--gold-hi); }
+
+  section { padding: 30px 0; border-top: 1px solid var(--border); }
+  section h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0 0 6px; }
+  section .lead { color: var(--text-muted); margin: 0 0 22px; }
+
+  .grid { display: grid; gap: 14px; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 760px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: linear-gradient(180deg, var(--surface-2), rgba(0,23,63,.35));
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 24px 60px -30px rgba(0,0,0,.6);
+  }
+  .card h3 { margin: 0 0 6px; font-size: 18px; }
+  .card .pill { display:inline-block; font-size: 12px; font-weight:600; color: var(--brand-light); background: rgba(0,73,198,.16); border:1px solid rgba(79,156,249,.25); padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
+  .card p { margin: 0; color: var(--text-muted); font-size: 14.5px; }
+  .card .takeaway { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); color: var(--gold-hi); font-size: 14px; }
+  .card .launch { margin-top: 14px; }
+
+  ul.clean { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  ul.clean li { padding-left: 22px; position: relative; color: var(--text-muted); font-size: 15px; }
+  ul.clean li::before { content: ""; position: absolute; left: 0; top: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+  ul.clean li b { color: var(--text); font-weight: 600; }
+
+  .preview-frame {
+    width: 100%; height: 760px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--surface-2); box-shadow: 0 30px 80px -40px rgba(0,0,0,.7);
+  }
+  @media (max-width: 760px) { .preview-frame { height: 1100px; } }
+
+  footer { padding: 28px 0 48px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border); }
+  footer .disclaimer { background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <img src="https://simulateur-crypto-sinvestir-demo.vercel.app/logo-sinvestir-cropped.png" alt="S'investir — Simulateurs" />
+    <a class="btn btn-primary" href="https://simulateur-crypto-sinvestir-demo.vercel.app" target="_blank" rel="noopener">Ouvrir la démo en ligne →</a>
+  </header>
+
+  <div class="hero">
+    <div class="kicker">Tutoriel</div>
+    <h1>Simulateur Crypto — déjà utilisable</h1>
+    <p>Choisissez une crypto, une stratégie, un montant et une période : l'outil rejoue l'histoire sur des données réelles et vous montre, surtout, <b>ce que ça vous apprend</b>. La discipline bat l'émotion.</p>
+    <div class="cta">
+      <a class="btn btn-gold" href="https://simulateur-crypto-sinvestir-demo.vercel.app" target="_blank" rel="noopener">▶ Tester maintenant</a>
+      <a class="btn btn-ghost" href="#apercu">Voir l'aperçu live</a>
+    </div>
+  </div>
+
+  <div class="note">
+    📎 Ce tutoriel est un simple fichier <b>HTML</b> : il s'ouvre dans <b>n'importe quel navigateur</b> (Chrome, Edge, Safari, Firefox), sans rien installer. L'aperçu live et les boutons « Lancer » nécessitent une connexion internet (la démo est déjà en ligne).
+  </div>
+
+  <!-- 4 LEVIERS -->
+  <section>
+    <h2>1. Les 4 leviers que vous pilotez</h2>
+    <p class="lead">Chaque changement recalcule instantanément les résultats et le graphique.</p>
+    <div class="grid grid-2">
+      <div class="card"><h3>🪙 Cryptomonnaie</h3><p>Bitcoin, Ethereum ou Solana — l'actif simulé.</p></div>
+      <div class="card"><h3>🎯 Stratégie</h3><p>Achat unique, ou versements réguliers (DCA mensuel, hebdo, quotidien) pour lisser dans le temps.</p></div>
+      <div class="card"><h3>💶 Montant</h3><p>Champ libre + curseur : montant unique, ou montant par versement en DCA.</p></div>
+      <div class="card"><h3>📅 Période</h3><p>Date de début → date de fin. Données disponibles de 2017 à 2026.</p></div>
+    </div>
+  </section>
+
+  <!-- LIRE LES RESULTATS -->
+  <section>
+    <h2>2. Lire les résultats</h2>
+    <p class="lead">Pas juste « combien j'aurais gagné » — l'outil explique aussi le risque et le comportement.</p>
+    <ul class="clean">
+      <li><b>Valeur finale</b> du portefeuille, <b>montant investi</b> et nombre de versements.</li>
+      <li><b>Plus / moins-value</b> en euros et en pourcentage.</li>
+      <li><b>Graphique</b> à 3 courbes : investi, valeur réelle, et « si vous aviez paniqué ».</li>
+      <li><b>Discipline vs émotion</b> : le coût de la panique chiffré, la pire chute (max drawdown), le temps passé en moins-value.</li>
+      <li><b>Mise en perspective</b> : la même somme en ETF Monde ou Livret A, pour comparer honnêtement.</li>
+    </ul>
+  </section>
+
+  <!-- 3 SCENARIOS -->
+  <section>
+    <h2>3. Trois scénarios à lancer en un clic</h2>
+    <p class="lead">Les boutons ouvrent le simulateur déjà préconfiguré.</p>
+    <div class="grid grid-3">
+      <div class="card">
+        <span class="pill">La force du DCA</span>
+        <h3>100 €/mois sur Bitcoin depuis 2020</h3>
+        <p>Malgré des chutes violentes, les versements réguliers lissent le prix d'achat.</p>
+        <div class="takeaway">→ Pas besoin de « bien tomber » : rester investi paie.</div>
+        <div class="launch"><a class="btn btn-gold" target="_blank" rel="noopener" href="https://simulateur-crypto-sinvestir-demo.vercel.app/embed?crypto=bitcoin&frequency=monthly&amount=100&start=2020-01-01&end=2026-06-01">Lancer ce scénario →</a></div>
+      </div>
+      <div class="card">
+        <span class="pill">Le piège du timing</span>
+        <h3>1 000 € d'un coup sur Ethereum en 2021</h3>
+        <p>Regardez la pire chute et la courbe « si vous aviez paniqué ».</p>
+        <div class="takeaway">→ Tout placer au sommet + paniquer = le pire combo.</div>
+        <div class="launch"><a class="btn btn-gold" target="_blank" rel="noopener" href="https://simulateur-crypto-sinvestir-demo.vercel.app/embed?crypto=ethereum&frequency=one-shot&amount=1000&start=2021-11-01&end=2026-06-01">Lancer ce scénario →</a></div>
+      </div>
+      <div class="card">
+        <span class="pill">La volatilité réelle</span>
+        <h3>50 €/semaine sur Solana depuis 2022</h3>
+        <p>Comparez le rendement au repère ETF Monde / Livret A.</p>
+        <div class="takeaway">→ Surperformance possible… au prix d'une forte volatilité.</div>
+        <div class="launch"><a class="btn btn-gold" target="_blank" rel="noopener" href="https://simulateur-crypto-sinvestir-demo.vercel.app/embed?crypto=solana&frequency=weekly&amount=50&start=2022-01-01&end=2026-06-01">Lancer ce scénario →</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APERCU LIVE -->
+  <section id="apercu">
+    <h2>4. Aperçu live (intégré ici)</h2>
+    <p class="lead">Le simulateur est embarquable dans n'importe quelle page via une iframe — exactement comme dans vos articles. En voici la preuve, ci-dessous :</p>
+    <iframe class="preview-frame" src="https://simulateur-crypto-sinvestir-demo.vercel.app/embed?crypto=bitcoin&frequency=monthly&amount=100&start=2020-01-01&end=2026-06-01" title="Simulateur Crypto S'investir" loading="lazy"></iframe>
+  </section>
+
+  <!-- POURQUOI VIABLE -->
+  <section>
+    <h2>5. Pourquoi c'est déjà viable</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h3>👤 Pour l'utilisateur</h3>
+        <p>En ligne, gratuit, instantané, responsive (mobile + desktop), en français. Des scénarios d'exemple en 1 clic.</p>
+      </div>
+      <div class="card">
+        <h3>🚀 Pour S'investir</h3>
+        <p>Embarquable dans vos articles (widget iframe). 100 % aligné Evidence-Based Investing. Pédagogique et conforme (disclaimer permanent).</p>
+      </div>
+      <div class="card">
+        <h3>🛠️ Côté technique</h3>
+        <p>Logique métier pure et testée, source de données interchangeable, couche IA optionnelle avec repli automatique : la démo ne tombe jamais.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="disclaimer">
+      <b>Avertissement.</b> Simulation pédagogique fondée sur des données historiques approximatives. Les performances passées ne préjugent pas des performances futures. L'investissement en cryptomonnaies est très volatil et comporte un risque de perte en capital. Ceci ne constitue pas un conseil en investissement.
+    </div>
+    <p style="margin-top:16px; text-align:center;">
+      Démo : <a href="https://simulateur-crypto-sinvestir-demo.vercel.app" target="_blank" rel="noopener">simulateur-crypto-sinvestir-demo.vercel.app</a>
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>
