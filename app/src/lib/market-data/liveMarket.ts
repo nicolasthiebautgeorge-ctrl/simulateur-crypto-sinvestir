@@ -7,7 +7,7 @@ import type { CryptoId } from "@/lib/simulation/types";
  * précédent ou null (le coach reste fonctionnel avec l'historique seul).
  */
 
-interface LiveCoin {
+export interface LiveCoin {
   id: string;
   name: string;
   price: number;
@@ -74,6 +74,12 @@ const eur2 = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
 function signedPct(x: number | null): string {
   if (x == null) return "n/d";
   return `${x >= 0 ? "+" : ""}${x.toFixed(1)} %`;
+}
+
+/** Données live structurées pour la crypto demandée (ou null si indisponible). */
+export async function getLiveCoin(crypto: CryptoId): Promise<LiveCoin | null> {
+  const map = await refresh();
+  return map?.get(crypto) ?? null;
 }
 
 /** Brief texte temps réel pour la crypto demandée (ou null si indisponible). */

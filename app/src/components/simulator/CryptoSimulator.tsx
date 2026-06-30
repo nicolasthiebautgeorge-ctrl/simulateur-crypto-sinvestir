@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/Card";
 import { Reveal } from "@/components/ui/Reveal";
 import { SimulatorForm } from "@/components/simulator/SimulatorForm";
 import { ScenarioAssistant } from "@/components/simulator/ScenarioAssistant";
+import { LivePrice } from "@/components/simulator/LivePrice";
 import { ResultsCards } from "@/components/simulator/ResultsCards";
 import { BehaviorInsight } from "@/components/simulator/BehaviorInsight";
 import { BenchmarkComparison } from "@/components/simulator/BenchmarkComparison";
@@ -86,6 +87,8 @@ export function CryptoSimulator({ initialInput }: CryptoSimulatorProps) {
       </Card>
 
       <div className="flex flex-col gap-5">
+        <LivePrice cryptoId={input.crypto} />
+
         {result.warnings
           .filter((w) => w.code !== "DATES_CLAMPED")
           .map((w) => (

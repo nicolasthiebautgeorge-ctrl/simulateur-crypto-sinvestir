@@ -7,6 +7,22 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-30] Cours en direct affiché dans l'UI (CoinGecko)
+
+### Contexte
+- Rendre visible le temps réel à l'écran (pas seulement dans le coach).
+
+### Décisions
+- `liveMarket.ts` expose désormais des **données structurées** (`getLiveCoin`) en plus du brief texte.
+- Nouvelle route `GET /api/market?crypto=` (proxy CoinGecko, cache 60 s, 204 si indispo).
+- Composant client `LivePrice` : prix EUR, variation 24h (colorée), 7j/30j, écart au plus-haut, **maj auto 60 s**, label « source CoinGecko ». Masqué silencieusement si indisponible.
+- Intégré en haut de la colonne résultats du simulateur.
+
+### Choix & justifications
+- Réutilisation du module live + cache serveur → pas d'appel CoinGecko direct depuis le client, cohérent avec le coach.
+
+---
+
 ## [2026-06-30] Coach connecté au marché temps réel (CoinGecko)
 
 ### Contexte
