@@ -7,6 +7,24 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-30] Calibrage du ton du coach : affirmé & motivant, dans le cadre AMF
+
+### Contexte
+- Demande : un coach plus **confiant et conseiller**, sans sortir du cadre légal.
+
+### Décisions
+- Prompts **texte** (`/api/advisor`) et **vocal** (`/api/voice`) réécrits : posture de coach affirmé, qui prend position, encourage et oriente vers l'action.
+- Recommandations de **méthode/comportement** assumées avec conviction (discipline, régularité, horizon long, DCA, diversification, gestion du risque).
+
+### Garde-fous (AMF) conservés
+- **Pas** de conseil en investissement personnalisé (« achète/vends tel actif pour ta situation »).
+- **Aucune** promesse de rendement ; rappel « passé ≠ futur » uniquement quand c'est pertinent (moins robotique).
+
+### Choix & justifications
+- Distinguer *recommander une méthode* (autorisé, pédagogique) de *conseiller un acte d'investissement personnalisé* (réglementé) → on gagne en impact sans risque réglementaire.
+
+---
+
 ## [2026-06-30] Mode vocal nouvelle génération (gpt-audio, voix marin/cedar)
 
 ### Contexte
