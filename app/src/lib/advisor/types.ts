@@ -3,6 +3,8 @@
  * Même principe que `MarketDataProvider` : le composant ne dépend pas de l'implémentation.
  */
 
+import type { CryptoId } from "@/lib/simulation/types";
+
 export type AdvisorRole = "user" | "assistant";
 
 export interface AdvisorMessage {
@@ -15,6 +17,7 @@ export interface AdvisorMessage {
  * Sert de « mémoire » factuelle : le coach raisonne sur ces chiffres réels.
  */
 export interface AdvisorContext {
+  cryptoId: CryptoId;
   cryptoLabel: string;
   frequencyLabel: string;
   periodLabel: string;
@@ -30,6 +33,8 @@ export interface AdvisorContext {
   benchmarks: { label: string; finalValue: number; profitPct: number }[];
   /** Repères de fluctuation réels (volatilité, krachs…) issus du dataset. */
   marketBrief: string;
+  /** Snapshot marché temps réel (rempli côté serveur via CoinGecko). */
+  liveMarket?: string;
 }
 
 export interface AdvisorReply {

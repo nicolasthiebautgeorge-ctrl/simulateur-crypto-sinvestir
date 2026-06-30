@@ -21,6 +21,7 @@ export function buildAdvisorContext(
   benchmarks: BenchmarkResult[],
 ): AdvisorContext {
   return {
+    cryptoId: result.crypto,
     cryptoLabel: CRYPTOS[result.crypto]?.name ?? result.crypto,
     frequencyLabel: FREQUENCY_LABELS[result.frequency],
     periodLabel: `${formatDateLabel(result.effectiveRange.start)} → ${formatDateLabel(

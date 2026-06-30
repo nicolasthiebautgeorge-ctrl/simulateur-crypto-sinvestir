@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { AdvisorContext, AdvisorMessage } from "@/lib/advisor/types";
 import { answerWithMock } from "@/lib/advisor/mockAdvisor";
 import { checkRateLimit, clientKey } from "@/lib/advisor/rateLimit";
+import { getLiveBrief } from "@/lib/market-data/liveMarket";
 
 interface AdvisorRequestBody {
   messages: AdvisorMessage[];
@@ -23,7 +24,8 @@ function systemPrompt(ctx: AdvisorContext): string {
     "- Facteurs de fluctuation : liquidité et taux (macro), adoption et flux (ETF, institutionnels), narratifs/technologie, régulation, effets de levier et liquidations.",
     "- Gestion du risque : taille de position adaptée, diversification, part raisonnable du patrimoine, horizon long, sécurité (cold wallet, vigilance arnaques/phishing), ne pas utiliser de levier quand on débute.",
     "- Le DCA lisse le prix d'entrée et neutralise le besoin de « timer » le marché ; il transforme la volatilité en alliée.",
-    "- Appuie tes propos sur les REPÈRES DE FLUCTUATION RÉELS fournis dans le contexte (marketBrief). Cite des ordres de grandeur, sans inventer de chiffres précis non fournis.",
+    "- `marketBrief` = repères HISTORIQUES illustratifs (volatilité, ampleur des krachs, cycles) : sers-t'en pour expliquer la DYNAMIQUE, en ordres de grandeur, sans inventer de chiffres.",
+    "- `liveMarket` (si présent) = situation ACTUELLE réelle (prix, variations 24h/7j/30j, écart au plus-haut). C'est LUI qui fait foi pour tout ce qui est « maintenant ». Ne donne aucun prix actuel non fourni par liveMarket.",
     "CADRE LÉGAL (à respecter sans alourdir le discours) :",
     "- Tu peux recommander des PRINCIPES et des MÉTHODES avec assurance, mais tu NE donnes PAS de conseil en investissement personnalisé : pas de « achète/vends tel actif maintenant » adapté à la situation perso de la personne (contrainte AMF).",
     "- Tu ne promets aucun rendement, tu ne garantis rien. Quand c'est utile (pas à chaque message), rappelle brièvement que les performances passées ne préjugent pas du futur.",
@@ -124,11 +126,15 @@ export async function POST(request: Request) {
     return NextResponse.json(answerWithMock(messages, context));
   }
 
+  // Enrichit le contexte avec un snapshot marché temps réel (best-effort).
+  const live = await getLiveBrief(context.cryptoId);
+  const enriched = live ? { ...context, liveMarket: live } : context;
+
   const usingOpenAI = Boolean(process.env.OPENAI_API_KEY);
   try {
     const reply =
-      (await callOpenAI(messages, context)) ??
-      (await callGroq(messages, context));
+      (await callOpenAI(messages, enriched)) ??
+      (await callGroq(messages, enriched));
     if (reply) {
       return NextResponse.json({
         reply,
@@ -139,5 +145,5 @@ export async function POST(request: Request) {
     // Erreur LLM (quota, réseau, modèle invalide…) → fallback mock silencieux.
   }
 
-  return NextResponse.json(answerWithMock(messages, context));
+  return NextResponse.json(answerWithMock(messages, enriched));
 }

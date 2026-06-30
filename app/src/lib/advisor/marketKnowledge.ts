@@ -96,21 +96,19 @@ export function buildMarketBrief(crypto: CryptoId): string {
   const vol = annualizedVolatility(prices);
   const dd = maxDrawdown(series);
   const { best, worst } = rolling12(prices);
-  const current = prices[prices.length - 1];
-  const ath = Math.max(...prices);
-  const belowAth = current / ath - 1;
   const nbCorr = corrections30(prices);
 
+  // Repères HISTORIQUES uniquement (forme des cycles, ampleur des krachs).
+  // La situation « actuelle » (prix, écart au plus-haut) vient de liveMarket.
   return [
-    `${meta.name} (${meta.symbol}) — repères historiques réels`,
-    `(données mensuelles approx. ${formatDateLabel(series[0].date)} → ${formatDateLabel(
+    `${meta.name} (${meta.symbol}) — repères historiques (forme des cycles)`,
+    `(données mensuelles illustratives ${formatDateLabel(series[0].date)} → ${formatDateLabel(
       series[series.length - 1].date,
     )}) :`,
     `volatilité annualisée ≈ ${Math.round(vol * 100)} % ;`,
-    `pire krach historique ≈ ${pct(dd.pct)} (de ${formatDateLabel(
+    `pire krach pic→creux ≈ ${pct(dd.pct)} (de ${formatDateLabel(
       dd.peakDate,
     )} à ${formatDateLabel(dd.troughDate)}) ;`,
-    `actuellement ${belowAth < -0.01 ? `${pct(belowAth)} sous` : "proche de"} son plus-haut ;`,
     `meilleure année glissante ${pct(best)}, pire ${pct(worst)} ;`,
     `${nbCorr} correction(s) de plus de 30 %.`,
   ].join(" ");

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { AdvisorContext, AdvisorMessage } from "@/lib/advisor/types";
 import { checkRateLimit, clientKey } from "@/lib/advisor/rateLimit";
+import { getLiveBrief } from "@/lib/market-data/liveMarket";
 
 interface VoiceRequestBody {
   messages: AdvisorMessage[];
@@ -28,7 +29,8 @@ function systemPrompt(ctx: AdvisorContext): string {
     "- Cycles d'environ 4 ans rythmés par le halving du Bitcoin ; replis de 70 à 85 pour cent déjà observés ; volatilité structurelle (les altcoins comme Ethereum ou Solana encore plus).",
     "- Fluctuations dues à la macro et aux taux, à l'adoption et aux flux, aux narratifs et à la régulation, à l'effet de levier.",
     "- Gestion du risque : taille de position raisonnable, diversification, horizon long, sécurité du portefeuille, pas de levier quand on débute. Le DCA transforme la volatilité en alliée.",
-    "- Appuie-toi sur les repères de fluctuation réels fournis dans le contexte (marketBrief), en ordres de grandeur, sans inventer de chiffres.",
+    "- marketBrief = repères historiques illustratifs (volatilité, ampleur des krachs) : pour expliquer la dynamique, en ordres de grandeur.",
+    "- liveMarket (si présent) = situation actuelle réelle (prix, variations) : c'est lui qui fait foi pour « maintenant ». Ne cite aucun prix actuel non fourni.",
     "CADRE LÉGAL (sans alourdir le discours) :",
     "- Tu recommandes des principes et des méthodes avec assurance, mais PAS de conseil en investissement personnalisé : pas de « achète ou vends tel actif maintenant » adapté à la situation de la personne (AMF).",
     "- Aucune promesse de rendement. Quand c'est utile (pas à chaque fois), rappelle brièvement que le passé ne préjuge pas du futur.",
@@ -68,6 +70,10 @@ export async function POST(request: Request) {
   const voice = process.env.OPENAI_AUDIO_VOICE ?? "marin";
   const recent = messages.slice(-8);
 
+  // Snapshot marché temps réel (best-effort).
+  const live = await getLiveBrief(context.cryptoId);
+  const enriched = live ? { ...context, liveMarket: live } : context;
+
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -80,7 +86,7 @@ export async function POST(request: Request) {
         modalities: ["text", "audio"],
         audio: { voice, format: "mp3" },
         messages: [
-          { role: "system", content: systemPrompt(context) },
+          { role: "system", content: systemPrompt(enriched) },
           ...recent.map((m) => ({ role: m.role, content: m.content })),
         ],
       }),

@@ -7,6 +7,25 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-30] Coach connecté au marché temps réel (CoinGecko)
+
+### Contexte
+- Suite logique de l'expert crypto : lui donner aussi le **contexte temps réel**, pas seulement l'historique du dataset.
+
+### Décisions
+- Nouveau module serveur `liveMarket.ts` : appel à l'**API publique gratuite CoinGecko** (`/coins/markets`, EUR) → prix, variations 24h/7j/30j, écart au plus-haut, market cap. **Cache mémoire 60 s** + **timeout 2,5 s** + repli cache/null (jamais bloquant).
+- `AdvisorContext` : ajout de `cryptoId` (pour l'appel live) et `liveMarket?` (rempli côté serveur dans les routes `/api/advisor` et `/api/voice`).
+- Prompts mis à jour : **`marketBrief` = repères HISTORIQUES illustratifs** (dynamique des cycles) ; **`liveMarket` = situation ACTUELLE réelle, qui fait foi pour « maintenant »**. Interdiction de citer un prix actuel non fourni.
+
+### Choix & justifications
+- Le dataset historique est **fictif/illustratif** (va à ~110 000 € en 2026) alors que le live est réel (~52 000 €). Séparer clairement historique (forme des cycles) et temps réel (prix actuel) évite toute contradiction et garde le coach crédible.
+- CoinGecko gratuit + cache 60 s = pas de clé, sous les limites de l'API, latence maîtrisée.
+
+### Prochaines étapes
+- Vérifier en prod (live injecté). Loom + dépôt.
+
+---
+
 ## [2026-06-30] Coach = expert crypto ancré sur des fluctuations réelles
 
 ### Contexte
