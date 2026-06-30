@@ -28,6 +28,8 @@ export interface AdvisorContext {
   panicCost: number;
   panicSellDateLabel: string;
   benchmarks: { label: string; finalValue: number; profitPct: number }[];
+  /** Repères de fluctuation réels (volatilité, krachs…) issus du dataset. */
+  marketBrief: string;
 }
 
 export interface AdvisorReply {

@@ -7,6 +7,26 @@ Ce journal trace **toutes les versions** du projet et **les choix** (techniques,
 
 ---
 
+## [2026-06-30] Coach = expert crypto ancré sur des fluctuations réelles
+
+### Contexte
+- Demande : faire du coach un vrai expert crypto, connaissant les fluctuations, « plus intelligent qu'un humain » sur la méthode — sans bluffer ni sortir du cadre AMF.
+
+### Décisions
+- **Ancrage data** : nouveau module `marketKnowledge.ts` qui calcule, depuis le dataset local, des **repères de fluctuation réels** par crypto : volatilité annualisée, pire krach pic→creux (avec dates), écart au plus-haut, meilleure/pire performance sur 12 mois glissants, nb de corrections > 30 %.
+- Ce `marketBrief` est ajouté à `AdvisorContext` (via `buildAdvisorContext`) → injecté dans les deux prompts (texte + vocal).
+- **Expertise prompt** : cycles ~4 ans (halving), volatilité structurelle, facteurs macro/flux/régulation/levier, gestion du risque (taille de position, diversification, sécurité cold wallet, pas de levier débutant), DCA qui transforme la volatilité en alliée.
+- **Angle « meilleur qu'un humain »** assumé de façon défendable : raisonne sur des chiffres, **sans biais émotionnel** (ni panique, ni euphorie) — pas de promesse de performance.
+
+### Choix & justifications
+- Ancrer l'expertise sur des chiffres calculés (non hallucinés) = crédibilité + honnêteté. Le modèle cite des ordres de grandeur réels, interdiction d'inventer des chiffres précis.
+- Garde-fous AMF conservés (méthode oui, conseil personnalisé non, aucune garantie).
+
+### Prochaines étapes
+- Option future : brancher des données live (CoinGecko) via `MarketDataProvider` pour des repères temps réel. Loom + dépôt.
+
+---
+
 ## [2026-06-30] Calibrage du ton du coach : affirmé & motivant, dans le cadre AMF
 
 ### Contexte

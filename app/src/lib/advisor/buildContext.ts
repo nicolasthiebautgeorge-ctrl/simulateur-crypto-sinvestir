@@ -5,6 +5,7 @@ import type {
 } from "@/lib/simulation/types";
 import type { AdvisorContext } from "@/lib/advisor/types";
 import { CRYPTOS } from "@/lib/market-data/cryptoDataset";
+import { buildMarketBrief } from "@/lib/advisor/marketKnowledge";
 import { formatDateLabel } from "@/lib/formatters";
 
 const FREQUENCY_LABELS: Record<Frequency, string> = {
@@ -39,5 +40,6 @@ export function buildAdvisorContext(
       finalValue: b.finalValue,
       profitPct: b.profitPct,
     })),
+    marketBrief: buildMarketBrief(result.crypto),
   };
 }
